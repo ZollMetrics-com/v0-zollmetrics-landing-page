@@ -6,7 +6,13 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { Mail, Phone, Send } from "lucide-react"
+import { Mail, Phone, Send, Check } from "lucide-react"
+
+const contactBenefits = [
+  "Kostenlose Erstanalyse Ihrer Zolldaten",
+  "Unverbindliche Potenzialeinschätzung",
+  "Persönliche Beratung durch Zollexperten",
+]
 
 export function ContactSection() {
   const [formData, setFormData] = useState({
@@ -18,7 +24,6 @@ export function ContactSection() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle form submission
     const mailtoLink = `mailto:team@zollmetrics.com?subject=Kontaktanfrage von ${formData.name} (${formData.company})&body=${encodeURIComponent(formData.message)}`
     window.location.href = mailtoLink
   }
@@ -27,24 +32,36 @@ export function ContactSection() {
     <section id="kontakt" className="bg-white py-16 md:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-12 text-center">
-          <h2 className="text-balance text-3xl font-bold text-slate-900 md:text-4xl">
+          <h2 className="text-balance text-3xl font-bold text-blue-900 md:text-4xl">
             Kontakt
           </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-slate-600">
+            Lassen Sie uns gemeinsam prüfen, ob in Ihren Zolldaten Erstattungspotenzial steckt.
+          </p>
         </div>
 
         <div className="grid gap-12 lg:grid-cols-2">
           {/* Contact Info */}
           <div className="flex flex-col justify-center gap-6">
             <div>
-              <h3 className="mb-4 text-xl font-semibold text-slate-900">
+              <h3 className="mb-4 text-xl font-semibold text-blue-900">
                 Sprechen Sie mit uns
               </h3>
               <p className="mb-6 text-slate-600">
-                Wir analysieren Ihr Erstattungspotenzial kostenlos und unverbindlich.
+                Wir melden uns innerhalb von 24 Stunden bei Ihnen und besprechen die nächsten Schritte.
               </p>
             </div>
             
-            <div className="flex flex-col gap-4">
+            <ul className="flex flex-col gap-3">
+              {contactBenefits.map((benefit, index) => (
+                <li key={index} className="flex items-center gap-3">
+                  <Check className="h-5 w-5 text-emerald-600" />
+                  <span className="text-slate-700">{benefit}</span>
+                </li>
+              ))}
+            </ul>
+            
+            <div className="mt-4 flex flex-col gap-4 border-t border-slate-200 pt-6">
               <a 
                 href="mailto:team@zollmetrics.com" 
                 className="flex items-center gap-3 text-slate-600 transition-colors hover:text-blue-900"
@@ -121,7 +138,7 @@ export function ContactSection() {
                 
                 <Button type="submit" className="mt-2 bg-blue-900 text-white hover:bg-blue-800">
                   <Send className="mr-2 h-4 w-4" />
-                  Senden
+                  Nachricht senden
                 </Button>
               </form>
             </CardContent>

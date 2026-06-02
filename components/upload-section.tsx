@@ -1,6 +1,12 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Upload, ShieldCheck } from "lucide-react"
+import { Upload, ShieldCheck, Check } from "lucide-react"
+
+const uploadFeatures = [
+  "256-bit SSL-Verschlüsselung",
+  "DSGVO-konformer Serverstandort in der EU",
+  "Automatische Löschung nach Projektabschluss",
+]
 
 export function UploadSection() {
   return (
@@ -13,11 +19,20 @@ export function UploadSection() {
             </div>
             
             <div>
-              <h2 className="mb-2 text-2xl font-bold text-slate-900">Der Datenraum</h2>
-              <p className="max-w-lg text-slate-600">
-                Für Bestandskunden: DSGVO-konformer Upload Ihrer Archivdaten.
+              <h2 className="mb-2 text-2xl font-bold text-blue-900">Der Datenraum</h2>
+              <p className="mx-auto max-w-lg text-slate-600">
+                Für Bestandskunden: Laden Sie Ihre Archivdaten sicher und DSGVO-konform hoch.
               </p>
             </div>
+            
+            <ul className="flex flex-col gap-2 text-left sm:flex-row sm:gap-6">
+              {uploadFeatures.map((feature, index) => (
+                <li key={index} className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-emerald-600" />
+                  <span className="text-sm text-slate-700">{feature}</span>
+                </li>
+              ))}
+            </ul>
             
             <Button asChild size="lg" className="bg-blue-900 text-white hover:bg-blue-800">
               <a 
