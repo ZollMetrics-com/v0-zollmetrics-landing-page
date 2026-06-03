@@ -15,15 +15,13 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-slate-200 bg-slate-50/95 backdrop-blur-sm">
+    <nav className="sticky top-0 z-50 border-b border-slate-200 backdrop-blur-sm" style={{ backgroundColor: 'rgba(245,244,242,0.97)' }}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
-          <a href="#" className="text-xl font-bold text-slate-900">
+          <a href="#" className="text-xl font-bold" style={{ color: '#0B1F3A' }}>
             ZollMetrics
           </a>
 
-          {/* Desktop Navigation */}
           <div className="hidden items-center gap-8 md:flex">
             {navLinks.map((link) => (
               <a
@@ -36,14 +34,12 @@ export function Navbar() {
             ))}
           </div>
 
-          {/* CTA Button */}
           <div className="hidden md:block">
-            <Button asChild className="bg-blue-900 text-white hover:bg-blue-800">
+            <Button asChild style={{ backgroundColor: '#0B1F3A' }} className="text-white hover:opacity-90">
               <a href="#kontakt">Kostenlose Erstberatung</a>
             </Button>
           </div>
 
-          {/* Mobile Menu Button */}
           <button
             className="md:hidden"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -57,7 +53,6 @@ export function Navbar() {
           </button>
         </div>
 
-        {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="border-t border-slate-200 py-4 md:hidden">
             <div className="flex flex-col gap-4">
@@ -71,7 +66,7 @@ export function Navbar() {
                   {link.label}
                 </a>
               ))}
-              <Button asChild className="mt-2 bg-blue-900 text-white hover:bg-blue-800">
+              <Button asChild className="mt-2 text-white hover:opacity-90" style={{ backgroundColor: '#0B1F3A' }}>
                 <a href="#kontakt" onClick={() => setMobileMenuOpen(false)}>
                   Kostenlose Erstberatung
                 </a>

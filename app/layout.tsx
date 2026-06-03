@@ -35,7 +35,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="de" className={inter.variable}>
-      <body className="font-sans antialiased bg-slate-50">
+      <body className="font-sans antialiased" style={{ backgroundColor: '#F5F4F2' }}>
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>

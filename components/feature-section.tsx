@@ -27,7 +27,7 @@ export function FeatureSection() {
     <section id="ansatz" className="py-16 md:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-12 text-center">
-          <h2 className="text-balance text-3xl font-bold text-blue-900 md:text-4xl">
+          <h2 className="text-balance text-3xl font-bold md:text-4xl" style={{ color: '#0B1F3A' }}>
             Die Schnittstelle zwischen ERP und Zollrecht
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-slate-600">
@@ -37,12 +37,12 @@ export function FeatureSection() {
 
         <div className="grid gap-6 md:grid-cols-3">
           {features.map((feature) => (
-            <Card key={feature.title} className="border-slate-200 bg-white">
+            <Card key={feature.title} className="border-slate-200 bg-white shadow-sm">
               <CardContent className="flex flex-col p-8">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-900/10">
-                  <feature.icon className="h-6 w-6 text-blue-900" />
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg" style={{ backgroundColor: 'rgba(11,31,58,0.08)' }}>
+                  <feature.icon className="h-6 w-6" style={{ color: '#0B1F3A' }} />
                 </div>
-                <h3 className="mb-3 text-lg font-semibold text-blue-900">
+                <h3 className="mb-3 text-lg font-semibold" style={{ color: '#0B1F3A' }}>
                   {feature.title}
                 </h3>
                 <p className="mb-4 text-sm text-slate-600">{feature.description}</p>
