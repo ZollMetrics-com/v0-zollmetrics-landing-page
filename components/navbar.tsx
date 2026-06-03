@@ -7,9 +7,10 @@ import { Menu, X } from "lucide-react"
 const navLinks = [
   { href: "#ansatz", label: "Ansatz" },
   { href: "#prozess", label: "Prozess" },
-  { href: "#datenraum", label: "Datenraum" },
   { href: "#kontakt", label: "Kontakt" },
 ]
+
+const customerLink = { href: "/datenraum", label: "Bestandskunde" }
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -32,6 +33,14 @@ export function Navbar() {
                 {link.label}
               </a>
             ))}
+            <div className="border-l border-slate-300 pl-8">
+              <a
+                href={customerLink.href}
+                className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900"
+              >
+                {customerLink.label}
+              </a>
+            </div>
           </div>
 
           <div className="hidden md:block">
@@ -66,6 +75,13 @@ export function Navbar() {
                   {link.label}
                 </a>
               ))}
+              <a
+                href={customerLink.href}
+                className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 border-t border-slate-200 pt-4"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {customerLink.label}
+              </a>
               <Button asChild className="mt-2 text-white hover:opacity-90" style={{ backgroundColor: '#0B1F3A' }}>
                 <a href="#kontakt" onClick={() => setMobileMenuOpen(false)}>
                   Kostenlose Erstberatung

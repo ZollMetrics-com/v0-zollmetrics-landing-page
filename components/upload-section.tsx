@@ -35,13 +35,9 @@ export function UploadSection() {
             </ul>
 
             <Button asChild size="lg" className="text-white hover:opacity-90" style={{ backgroundColor: '#0B1F3A' }}>
-              <a
-                href="https://drive.google.com"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href="/datenraum">
                 <Upload className="mr-2 h-4 w-4" />
-                Zum sicheren Google Drive Portal
+                Zum Datenraum
               </a>
             </Button>
           </CardContent>
