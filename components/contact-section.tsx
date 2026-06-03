@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { Mail, Phone, Upload, X, Check, FileText, AlertCircle } from "lucide-react"
+import { Mail, Phone, Upload, X, Check, FileText, CircleAlert as AlertCircle } from "lucide-react"
 
 const contactBenefits = [
   "Kostenlose Erstanalyse Ihrer Zolldaten",
