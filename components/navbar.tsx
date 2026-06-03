@@ -19,7 +19,7 @@ export function Navbar() {
     <nav className="sticky top-0 z-50 border-b border-slate-200 backdrop-blur-sm" style={{ backgroundColor: 'rgba(245,244,242,0.97)' }}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          <a href="#" className="text-xl font-bold" style={{ color: '#0B1F3A' }}>
+          <a href="/" className="text-xl font-bold" style={{ color: '#0B1F3A' }}>
             ZollMetrics
           </a>
 

@@ -2,7 +2,6 @@ import { Navbar } from "@/components/navbar"
 import { HeroSection } from "@/components/hero-section"
 import { FeatureSection } from "@/components/feature-section"
 import { ProcessSection } from "@/components/process-section"
-import { UploadSection } from "@/components/upload-section"
 import { ContactSection } from "@/components/contact-section"
 import { Footer } from "@/components/footer"
 
@@ -14,10 +13,10 @@ export default function Home() {
         <HeroSection />
         <FeatureSection />
         <ProcessSection />
-        <UploadSection />
         <ContactSection />
       </main>
       <Footer />
     </div>
   )
 }
+
