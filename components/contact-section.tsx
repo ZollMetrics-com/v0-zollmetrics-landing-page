@@ -45,9 +45,9 @@ function StepIndicator({ current }: { current: number }) {
             <div
               className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold transition-colors ${
                 s.number < current
-                  ? "bg-[#1d7afc] text-white"
+                  ? "bg-[#1a4fa8] text-white"
                   : s.number === current
-                  ? "bg-[#1d7afc] text-white shadow-lg shadow-[#1d7afc]/30"
+                  ? "bg-[#1a4fa8] text-white shadow-md"
                   : "border border-slate-300 bg-white text-slate-400"
               }`}
             >
@@ -55,7 +55,7 @@ function StepIndicator({ current }: { current: number }) {
             </div>
             <span
               className={`text-xs font-medium ${
-                s.number === current ? "text-[#1d7afc]" : s.number < current ? "text-slate-500" : "text-slate-400"
+                s.number === current ? "text-[#1a4fa8]" : s.number < current ? "text-slate-500" : "text-slate-400"
               }`}
             >
               {s.label}
@@ -64,7 +64,7 @@ function StepIndicator({ current }: { current: number }) {
           {i < steps.length - 1 && (
             <div
               className={`mb-5 h-0.5 w-16 transition-colors sm:w-24 ${
-                s.number < current ? "bg-[#1d7afc]" : "bg-slate-200"
+                s.number < current ? "bg-[#1a4fa8]" : "bg-slate-200"
               }`}
             />
           )}
@@ -82,10 +82,10 @@ function Field({
   return (
     <div className="flex flex-col gap-1.5">
       <label className="text-sm font-medium text-slate-700">
-        {label}{required && <span className="ml-0.5 text-[#1d7afc]"> *</span>}
+        {label}{required && <span className="ml-0.5 text-[#1a4fa8]"> *</span>}
       </label>
       {children}
-      {hint && <p className="text-xs text-[#1d7afc]">{hint}</p>}
+      {hint && <p className="text-xs text-[#1a4fa8]">{hint}</p>}
     </div>
   )
 }
@@ -103,7 +103,7 @@ function TextInput({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       required={required}
-      className="rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 transition-colors focus:border-[#1d7afc] focus:outline-none focus:ring-1 focus:ring-[#1d7afc]"
+      className="rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 transition-colors focus:border-[#1a4fa8] focus:outline-none focus:ring-1 focus:ring-[#1a4fa8]"
     />
   )
 }
@@ -119,7 +119,7 @@ function SelectInput({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       required={required}
-      className="rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 transition-colors focus:border-[#1d7afc] focus:outline-none focus:ring-1 focus:ring-[#1d7afc]"
+      className="rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 transition-colors focus:border-[#1a4fa8] focus:outline-none focus:ring-1 focus:ring-[#1a4fa8]"
     >
       <option value="">{placeholder}</option>
       {options.map((o) => <option key={o} value={o}>{o}</option>)}
@@ -185,11 +185,11 @@ export function ContactSection() {
 
   if (uploadStatus === "success") {
     return (
-      <section id="scan" className="py-16 md:py-24" style={{ backgroundColor: "#0d1b2e" }}>
+      <section id="scan" className="border-t py-16 md:py-24" style={{ backgroundColor: "#f8fafc", borderTopColor: "#e2e8f0" }}>
         <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
           <div
-            className="flex flex-col items-center gap-6 rounded-2xl border border-white/10 p-12 text-center"
-            style={{ backgroundColor: "rgba(255,255,255,0.03)" }}
+            className="flex flex-col items-center gap-6 rounded-2xl border p-12 text-center shadow-sm"
+            style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }}
           >
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/20">
               <Check className="h-8 w-8 text-emerald-400" />
@@ -202,7 +202,7 @@ export function ContactSection() {
             </div>
             <button
               onClick={() => { setUploadStatus("idle"); setStep(1); setFormData(EMPTY); setFiles([]) }}
-              className="rounded-lg border border-white/20 bg-white/8 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/12"
+              className="rounded-lg border border-slate-200 bg-slate-50 px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100"
             >
               Weitere Anfrage senden
             </button>
@@ -213,16 +213,16 @@ export function ContactSection() {
   }
 
   return (
-    <section id="scan" className="py-16 md:py-24" style={{ backgroundColor: "#0d1b2e" }}>
+    <section id="scan" className="border-t py-16 md:py-24" style={{ backgroundColor: "#f8fafc", borderTopColor: "#e2e8f0" }}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-12 text-center">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[#1d7afc]">
-            Kostenlosen Leak-Scan starten
+          <p className="mb-3 text-xs font-semibold uppercase tracking-widest" style={{ color: "#1a4fa8" }}>
+            Zoll-Audit starten
           </p>
-          <h2 className="text-3xl font-bold text-white md:text-4xl">
+          <h2 className="text-3xl font-bold md:text-4xl" style={{ color: "#0B192C" }}>
             Laden Sie ein kleines Test-Set hoch.
           </h2>
-          <p className="mx-auto mt-3 max-w-xl text-slate-400">
+          <p className="mx-auto mt-3 max-w-xl" style={{ color: "#64748b" }}>
             Bitte keine vollständigen Jahresarchive im Erstcheck.
           </p>
         </div>
@@ -235,15 +235,15 @@ export function ContactSection() {
 
           {/* Form card */}
           <div
-            className="rounded-2xl border border-white/10 p-8"
-            style={{ backgroundColor: "rgba(255,255,255,0.03)" }}
+            className="rounded-2xl border p-8 shadow-sm"
+            style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }}
           >
             <form onSubmit={handleSubmit}>
 
               {/* ── STEP 1: Kontakt ── */}
               {step === 1 && (
                 <div className="flex flex-col gap-5">
-                  <h3 className="text-lg font-semibold text-white">Ihre Kontaktdaten</h3>
+                  <h3 className="text-lg font-semibold" style={{ color: "#0B192C" }}>Ihre Kontaktdaten</h3>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <Field label="Vorname" required>
                       <TextInput id="vorname" placeholder="Max" value={formData.vorname} onChange={set("vorname")} required />
@@ -272,7 +272,7 @@ export function ContactSection() {
                     <button
                       type="button"
                       onClick={() => { if (formData.vorname && formData.nachname && formData.email && formData.unternehmen) setStep(2) }}
-                      className="flex items-center gap-2 rounded-lg bg-[#1d7afc] px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#1d7afc]/20 transition-opacity hover:opacity-90"
+                      className="flex items-center gap-2 rounded-lg bg-[#1a4fa8] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
                     >
                       Weiter <ChevronRight className="h-4 w-4" />
                     </button>
@@ -283,7 +283,7 @@ export function ContactSection() {
               {/* ── STEP 2: Importdaten ── */}
               {step === 2 && (
                 <div className="flex flex-col gap-5">
-                  <h3 className="text-lg font-semibold text-white">Ihre Importsituation</h3>
+                  <h3 className="text-lg font-semibold" style={{ color: "#0B192C" }}>Ihre Importsituation</h3>
                   <Field
                     label="Geschätzte Importvorgänge pro Jahr"
                     required
@@ -358,14 +358,14 @@ export function ContactSection() {
                     <button
                       type="button"
                       onClick={() => setStep(1)}
-                      className="flex items-center gap-2 rounded-lg border border-white/20 bg-white/8 px-5 py-2.5 text-sm font-medium text-slate-300 transition-colors hover:bg-white/12"
+                      className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100"
                     >
                       <ChevronLeft className="h-4 w-4" /> Zurück
                     </button>
                     <button
                       type="button"
                       onClick={() => { if (formData.importvorgaenge && formData.importvolumen && formData.herkunftslaender && formData.warengruppen) setStep(3) }}
-                      className="flex items-center gap-2 rounded-lg bg-[#1d7afc] px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#1d7afc]/20 transition-opacity hover:opacity-90"
+                      className="flex items-center gap-2 rounded-lg bg-[#1a4fa8] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
                     >
                       Weiter <ChevronRight className="h-4 w-4" />
                     </button>
@@ -376,9 +376,9 @@ export function ContactSection() {
               {/* ── STEP 3: Dokumente + Abschluss ── */}
               {step === 3 && (
                 <div className="flex flex-col gap-5">
-                  <h3 className="text-lg font-semibold text-white">Dokumente hochladen</h3>
-                  <p className="text-sm text-slate-400">
-                    Laden Sie 3–10 Beispieldokumente hoch: Zollbescheide, Handelsrechnungen, Packlisten oder Spediteursabrechnungen. <strong className="text-slate-300">Bitte keine vollständigen Jahresarchive.</strong>
+                  <h3 className="text-lg font-semibold" style={{ color: "#0B192C" }}>Dokumente hochladen</h3>
+                  <p className="text-sm" style={{ color: "#64748b" }}>
+                    Laden Sie 3–10 Beispieldokumente hoch: Zollbescheide, Handelsrechnungen, Packlisten oder Spediteursabrechnungen. <strong style={{ color: "#334155" }}>Bitte keine vollständigen Jahresarchive.</strong>
                   </p>
 
                   {/* Drag & drop zone */}
@@ -390,17 +390,17 @@ export function ContactSection() {
                     onClick={() => fileInputRef.current?.click()}
                     className={`flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed px-6 py-10 text-center transition-colors ${
                       dragActive
-                        ? "border-[#1d7afc] bg-[#1d7afc]/10"
-                        : "border-white/20 bg-white/3 hover:border-white/30 hover:bg-white/5"
+                        ? "border-[#1a4fa8] bg-blue-50"
+                        : "border-slate-300 bg-slate-50 hover:border-slate-400 hover:bg-white"
                     }`}
                   >
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#1d7afc]/15">
-                      <Upload className={`h-6 w-6 ${dragActive ? "text-[#1d7afc]" : "text-slate-400"}`} />
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#eef3fc]">
+                      <Upload className={`h-6 w-6 ${dragActive ? "text-[#1a4fa8]" : "text-slate-400"}`} />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-slate-300">
+                      <p className="text-sm font-medium text-slate-700">
                         Dateien hierher ziehen oder{" "}
-                        <span className="text-[#1d7afc] underline underline-offset-2">auswählen</span>
+                        <span className="underline underline-offset-2" style={{ color: "#1a4fa8" }}>auswählen</span>
                       </p>
                       <p className="mt-1 text-xs text-slate-500">PDF, ZIP, CSV, XLSX – mehrere Dateien möglich</p>
                     </div>
@@ -410,9 +410,9 @@ export function ContactSection() {
                   {files.length > 0 && (
                     <ul className="flex flex-col gap-1.5">
                       {files.map((file, i) => (
-                        <li key={i} className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/4 px-3 py-2 text-sm">
+                        <li key={i} className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
                           <FileText className="h-4 w-4 shrink-0 text-slate-400" />
-                          <span className="flex-1 truncate text-slate-300">{file.name}</span>
+                          <span className="flex-1 truncate text-slate-700">{file.name}</span>
                           <span className="shrink-0 text-xs text-slate-500">{formatFileSize(file.size)}</span>
                           <button type="button" onClick={() => setFiles((p) => p.filter((_, j) => j !== i))} className="shrink-0 text-slate-500 hover:text-red-400">
                             <X className="h-3.5 w-3.5" />
@@ -423,13 +423,13 @@ export function ContactSection() {
                   )}
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-slate-300">Anmerkungen (optional)</label>
+                    <label className="text-sm font-medium text-slate-700">Anmerkungen (optional)</label>
                     <textarea
                       rows={3}
                       placeholder="Gibt es etwas, das wir beim Erstcheck besonders beachten sollen?"
                       value={formData.nachricht}
                       onChange={(e) => setFormData((p) => ({ ...p, nachricht: e.target.value }))}
-                      className="rounded-md border border-white/20 bg-white/5 px-3 py-2.5 text-sm text-slate-300 placeholder-slate-500 focus:border-[#1d7afc] focus:outline-none focus:ring-1 focus:ring-[#1d7afc]"
+                      className="rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-[#1a4fa8] focus:outline-none focus:ring-1 focus:ring-[#1a4fa8]"
                     />
                   </div>
 
@@ -444,14 +444,14 @@ export function ContactSection() {
                     <button
                       type="button"
                       onClick={() => setStep(2)}
-                      className="flex items-center gap-2 rounded-lg border border-white/20 bg-white/8 px-5 py-2.5 text-sm font-medium text-slate-300 transition-colors hover:bg-white/12"
+                      className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100"
                     >
                       <ChevronLeft className="h-4 w-4" /> Zurück
                     </button>
                     <button
                       type="submit"
                       disabled={uploadStatus === "uploading"}
-                      className="flex items-center gap-2 rounded-lg bg-[#1d7afc] px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#1d7afc]/20 transition-opacity hover:opacity-90 disabled:opacity-60"
+                      className="flex items-center gap-2 rounded-lg bg-[#1a4fa8] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90 disabled:opacity-60"
                     >
                       {uploadStatus === "uploading" ? (
                         <><span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> Wird gesendet...</>

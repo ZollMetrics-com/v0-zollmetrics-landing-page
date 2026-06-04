@@ -1,10 +1,11 @@
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { Check } from "lucide-react"
+import Link from "next/link"
 
 export const metadata = {
-  title: "Ablauf & Preise – ZollMetrics",
-  description: "So funktioniert der Upload-Prozess und das Kostenmodell von ZollMetrics.",
+  title: "Ablauf & Kosten – ZollMetrics",
+  description: "Prozessübersicht und Kostenmodell für die ZollMetrics Potenzialanalyse.",
 }
 
 const timelineSteps = [
@@ -57,72 +58,52 @@ const pricingCards = [
   },
 ]
 
+function PageHeader({ eyebrow, title, subtitle }: { eyebrow: string; title: string; subtitle: string }) {
+  return (
+    <section className="border-b pt-16" style={{ backgroundColor: "#f8fafc", borderBottomColor: "#e2e8f0" }}>
+      <div className="mx-auto max-w-4xl px-4 py-16 text-center sm:px-6 lg:px-8">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-widest" style={{ color: "#1a4fa8" }}>{eyebrow}</p>
+        <h1 className="mb-4 text-4xl font-bold md:text-5xl" style={{ color: "#0B192C" }}>{title}</h1>
+        <p className="mx-auto max-w-2xl text-lg" style={{ color: "#475569" }}>{subtitle}</p>
+      </div>
+    </section>
+  )
+}
+
 export default function AblaufKostenPage() {
   return (
-    <div className="flex min-h-screen flex-col" style={{ backgroundColor: "#060e1a" }}>
+    <div className="flex min-h-screen flex-col bg-white">
       <Navbar />
-
-      {/* Hero */}
-      <section
-        className="relative overflow-hidden pt-16"
-        style={{ backgroundColor: "#0a1526" }}
-      >
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(29,122,252,0.07) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(29,122,252,0.07) 1px, transparent 1px)
-            `,
-            backgroundSize: "60px 60px",
-          }}
-        />
-        <div
-          className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2"
-          style={{
-            width: "800px",
-            height: "400px",
-            background: "radial-gradient(ellipse at 50% 0%, rgba(29,122,252,0.13) 0%, transparent 70%)",
-          }}
-        />
-        <div className="relative mx-auto max-w-4xl px-4 py-20 text-center sm:px-6 lg:px-8">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#1d7afc]/30 bg-[#1d7afc]/10 px-4 py-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#1d7afc]" />
-            <span className="text-sm font-medium text-[#5ba3ff]">Ablauf & Preise</span>
-          </div>
-          <h1 className="mb-4 text-4xl font-bold text-white md:text-5xl">
-            Schnell zur ersten Potenzialeinschätzung
-          </h1>
-          <p className="mx-auto max-w-2xl text-lg text-slate-400">
-            Von der Dateneingabe bis zur ersten Einschätzung – ohne lange Wartezeiten auf Demo-Calls.
-          </p>
-        </div>
-      </section>
+      <PageHeader
+        eyebrow="Ablauf & Kosten"
+        title="Schnell zur ersten Potenzialeinschätzung"
+        subtitle="Von der Dateneingabe bis zur ersten Einschätzung – ohne lange Wartezeiten auf Demo-Calls."
+      />
 
       <main className="flex-1">
-        {/* 4-step timeline */}
-        <section className="py-16 md:py-24" style={{ backgroundColor: "#0d1b2e" }}>
-          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col gap-6">
+        {/* Timeline */}
+        <section className="py-16 md:py-24" style={{ backgroundColor: "#ffffff" }}>
+          <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col">
               {timelineSteps.map((item, i) => (
                 <div key={item.step} className="flex items-start gap-6">
                   <div className="flex flex-col items-center">
                     <div
-                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
-                      style={{ backgroundColor: "#1d7afc" }}
+                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white shadow-sm"
+                      style={{ backgroundColor: "#1a4fa8" }}
                     >
                       {item.step}
                     </div>
                     {i < timelineSteps.length - 1 && (
-                      <div className="mt-2 w-0.5 flex-1 bg-white/10" style={{ minHeight: "32px" }} />
+                      <div className="mt-1 w-0.5 flex-1 bg-slate-200" style={{ minHeight: "36px" }} />
                     )}
                   </div>
                   <div
-                    className="mb-6 flex-1 rounded-xl border border-white/10 p-6"
-                    style={{ backgroundColor: "rgba(255,255,255,0.03)" }}
+                    className="mb-5 flex-1 rounded-xl border p-6 shadow-sm"
+                    style={{ backgroundColor: "#f8fafc", borderColor: "#e2e8f0" }}
                   >
-                    <h3 className="mb-1 font-semibold text-white">{item.title}</h3>
-                    <p className="text-sm leading-relaxed text-slate-400">{item.desc}</p>
+                    <h3 className="mb-1.5 font-semibold" style={{ color: "#0B192C" }}>{item.title}</h3>
+                    <p className="text-sm leading-relaxed" style={{ color: "#64748b" }}>{item.desc}</p>
                   </div>
                 </div>
               ))}
@@ -131,13 +112,11 @@ export default function AblaufKostenPage() {
         </section>
 
         {/* Pricing */}
-        <section id="preise" className="border-t border-white/8 py-16 md:py-24" style={{ backgroundColor: "#0a1526" }}>
+        <section id="preise" className="border-t py-16 md:py-24" style={{ backgroundColor: "#f8fafc", borderTopColor: "#e2e8f0" }}>
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mb-12 text-center">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[#1d7afc]">
-                Preise
-              </p>
-              <h2 className="text-3xl font-bold text-white md:text-4xl">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-widest" style={{ color: "#1a4fa8" }}>Kostenmodell</p>
+              <h2 className="text-3xl font-bold md:text-4xl" style={{ color: "#0B192C" }}>
                 Kostenloser Erstcheck. Vergütung nur bei Ergebnis.
               </h2>
             </div>
@@ -146,23 +125,22 @@ export default function AblaufKostenPage() {
               {pricingCards.map((card) => (
                 <div
                   key={card.badge}
-                  className={`rounded-xl p-8 ${
-                    card.highlight
-                      ? "border-2 border-[#1d7afc] shadow-lg shadow-[#1d7afc]/10"
-                      : "border border-white/10"
-                  }`}
-                  style={{ backgroundColor: card.highlight ? "rgba(29,122,252,0.06)" : "rgba(255,255,255,0.03)" }}
+                  className={`rounded-xl p-8 ${card.highlight ? "shadow-md" : "shadow-sm"}`}
+                  style={{
+                    backgroundColor: "#ffffff",
+                    border: card.highlight ? "2px solid #1a4fa8" : "1px solid #e2e8f0",
+                  }}
                 >
-                  <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-[#1d7afc]">
+                  <div className="mb-1 text-xs font-semibold uppercase tracking-widest" style={{ color: "#1a4fa8" }}>
                     {card.badge}
                   </div>
-                  <div className="mb-1 text-lg font-bold text-white">{card.title}</div>
-                  <div className="mb-4 text-2xl font-bold text-white">{card.price}</div>
-                  <p className="mb-6 text-sm text-slate-400">{card.desc}</p>
-                  <ul className="flex flex-col gap-2">
+                  <div className="mb-1 text-base font-semibold" style={{ color: "#475569" }}>{card.title}</div>
+                  <div className="mb-4 text-2xl font-bold" style={{ color: "#0B192C" }}>{card.price}</div>
+                  <p className="mb-6 text-sm" style={{ color: "#64748b" }}>{card.desc}</p>
+                  <ul className="flex flex-col gap-2.5">
                     {card.features.map((f) => (
-                      <li key={f} className="flex items-start gap-2 text-sm text-slate-300">
-                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#1d7afc]" />
+                      <li key={f} className="flex items-start gap-2 text-sm" style={{ color: "#334155" }}>
+                        <Check className="mt-0.5 h-4 w-4 shrink-0" style={{ color: "#1a4fa8" }} />
                         {f}
                       </li>
                     ))}
@@ -174,7 +152,7 @@ export default function AblaufKostenPage() {
         </section>
 
         {/* CTA */}
-        <section className="border-t border-white/8 py-16" style={{ backgroundColor: "#0d1b2e" }}>
+        <section className="border-t py-16" style={{ backgroundColor: "#0B192C", borderTopColor: "#1e2d3f" }}>
           <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
             <h2 className="mb-4 text-2xl font-bold text-white md:text-3xl">
               Jetzt kostenlos starten
@@ -182,12 +160,13 @@ export default function AblaufKostenPage() {
             <p className="mb-8 text-slate-400">
               Laden Sie 3–10 Beispieldokumente hoch und erhalten Sie Ihre erste Einschätzung – ohne Sales-Call, ohne Vertrag.
             </p>
-            <a
+            <Link
               href="/#scan"
-              className="inline-flex items-center rounded-lg bg-[#1d7afc] px-6 py-3 font-semibold text-white shadow-lg shadow-[#1d7afc]/25 transition-opacity hover:opacity-90"
+              className="inline-flex items-center rounded-lg px-6 py-3 font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
+              style={{ backgroundColor: "#1a4fa8" }}
             >
-              Kostenlosen Leak-Scan starten
-            </a>
+              Kostenlose Potenzialanalyse starten
+            </Link>
           </div>
         </section>
       </main>

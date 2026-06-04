@@ -1,9 +1,10 @@
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { Tag, DollarSign, Globe, Truck, RotateCcw, TrendingUp } from "lucide-react"
+import Link from "next/link"
 
 export const metadata = {
-  title: "Was ZollMetrics prüft – Lösung & Prüfbereiche",
+  title: "Lösung & Prüfbereiche – ZollMetrics",
   description: "6 systematische Prüfbereiche für Zoll-Überzahlungen in Ihren Importdaten.",
 }
 
@@ -40,91 +41,71 @@ const checkAreas = [
   },
 ]
 
+function PageHeader({ eyebrow, title, subtitle }: { eyebrow: string; title: string; subtitle: string }) {
+  return (
+    <section className="border-b pt-16" style={{ backgroundColor: "#f8fafc", borderBottomColor: "#e2e8f0" }}>
+      <div className="mx-auto max-w-4xl px-4 py-16 text-center sm:px-6 lg:px-8">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-widest" style={{ color: "#1a4fa8" }}>{eyebrow}</p>
+        <h1 className="mb-4 text-4xl font-bold md:text-5xl" style={{ color: "#0B192C" }}>{title}</h1>
+        <p className="mx-auto max-w-2xl text-lg" style={{ color: "#475569" }}>{subtitle}</p>
+      </div>
+    </section>
+  )
+}
+
 export default function LoesungPage() {
   return (
-    <div className="flex min-h-screen flex-col" style={{ backgroundColor: "#060e1a" }}>
+    <div className="flex min-h-screen flex-col bg-white">
       <Navbar />
+      <PageHeader
+        eyebrow="Lösung & Prüfbereiche"
+        title="Was ZollMetrics prüft"
+        subtitle="Sechs systematische Prüfbereiche decken die häufigsten Quellen von Zoll-Überzahlungen ab. Jeder Bereich wird anhand Ihrer tatsächlichen Importdaten analysiert."
+      />
 
-      {/* Hero */}
-      <section
-        className="relative overflow-hidden pt-16"
-        style={{ backgroundColor: "#0a1526" }}
-      >
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(29,122,252,0.07) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(29,122,252,0.07) 1px, transparent 1px)
-            `,
-            backgroundSize: "60px 60px",
-          }}
-        />
-        <div
-          className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2"
-          style={{
-            width: "800px",
-            height: "400px",
-            background: "radial-gradient(ellipse at 50% 0%, rgba(29,122,252,0.13) 0%, transparent 70%)",
-          }}
-        />
-        <div className="relative mx-auto max-w-4xl px-4 py-20 text-center sm:px-6 lg:px-8">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#1d7afc]/30 bg-[#1d7afc]/10 px-4 py-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#1d7afc]" />
-            <span className="text-sm font-medium text-[#5ba3ff]">Lösung & Prüfbereiche</span>
-          </div>
-          <h1 className="mb-4 text-4xl font-bold text-white md:text-5xl">
-            Was ZollMetrics prüft
-          </h1>
-          <p className="mx-auto max-w-2xl text-lg text-slate-400">
-            Sechs systematische Prüfbereiche decken die häufigsten Quellen von Zoll-Überzahlungen ab. Jeder Bereich wird anhand Ihrer tatsächlichen Importdaten analysiert.
-          </p>
-        </div>
-      </section>
-
-      {/* 6 check areas */}
       <main className="flex-1">
-        <section id="pruefbereiche" className="py-16 md:py-24" style={{ backgroundColor: "#0d1b2e" }}>
+        <section id="pruefbereiche" className="py-16 md:py-24" style={{ backgroundColor: "#ffffff" }}>
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {checkAreas.map((area, i) => (
                 <div
                   key={area.title}
-                  className="rounded-xl border border-white/10 p-6 transition-colors hover:border-[#1d7afc]/40"
-                  style={{ backgroundColor: "rgba(255,255,255,0.03)" }}
+                  className="rounded-xl border p-6 shadow-sm transition-shadow hover:shadow-md"
+                  style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }}
                 >
                   <div className="mb-4 flex items-center gap-3">
                     <div
                       className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
-                      style={{ backgroundColor: "rgba(29,122,252,0.15)" }}
+                      style={{ backgroundColor: "#eef3fc" }}
                     >
-                      <area.icon className="h-5 w-5 text-[#1d7afc]" />
+                      <area.icon className="h-5 w-5" style={{ color: "#1a4fa8" }} />
                     </div>
-                    <span className="text-xs font-semibold text-[#1d7afc]">0{i + 1}</span>
+                    <span className="text-xs font-bold" style={{ color: "#1a4fa8" }}>0{i + 1}</span>
                   </div>
-                  <h3 className="mb-2 font-semibold text-white">{area.title}</h3>
-                  <p className="text-sm leading-relaxed text-slate-400">{area.desc}</p>
+                  <h3 className="mb-2 font-semibold" style={{ color: "#0B192C" }}>{area.title}</h3>
+                  <p className="text-sm leading-relaxed" style={{ color: "#64748b" }}>{area.desc}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* CTA strip */}
-        <section className="border-t border-white/8 py-16" style={{ backgroundColor: "#0a1526" }}>
+        {/* CTA */}
+        <section className="border-t py-16" style={{ backgroundColor: "#f8fafc", borderTopColor: "#e2e8f0" }}>
           <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-            <h2 className="mb-4 text-2xl font-bold text-white md:text-3xl">
-              Bereit für Ihren kostenlosen Erstcheck?
+            <h2 className="mb-4 text-2xl font-bold md:text-3xl" style={{ color: "#0B192C" }}>
+              Bereit für Ihre kostenlose Potenzialanalyse?
             </h2>
-            <p className="mb-8 text-slate-400">
+            <p className="mb-8" style={{ color: "#64748b" }}>
               Laden Sie 3–10 Beispieldokumente hoch und erhalten Sie eine erste Einschätzung – ohne Sales-Call, ohne Vertrag.
             </p>
-            <a
+            <Link
               href="/#scan"
-              className="inline-flex items-center rounded-lg bg-[#1d7afc] px-6 py-3 font-semibold text-white shadow-lg shadow-[#1d7afc]/25 transition-opacity hover:opacity-90"
+              className="inline-flex items-center rounded-lg px-6 py-3 font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
+              style={{ backgroundColor: "#1a4fa8" }}
             >
-              Kostenlosen Leak-Scan starten
-            </a>
+              Kostenlose Potenzialanalyse starten
+            </Link>
           </div>
         </section>
       </main>
