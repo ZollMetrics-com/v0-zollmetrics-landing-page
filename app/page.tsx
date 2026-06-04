@@ -20,3 +20,8 @@ export default function Home() {
   )
 }
 
+export const metadata = {
+  title: "ZollMetrics – Versteckte Zoll-Überzahlungen finden",
+  description: "Kostenloser Duty-Leak-Scan: Wir prüfen Ihre Importdaten auf Zoll-Überzahlungen.",
+}
+
