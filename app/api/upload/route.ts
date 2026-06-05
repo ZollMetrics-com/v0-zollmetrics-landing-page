@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { google } from "googleapis"
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-}
-
 function getDriveClient() {
   const auth = new google.auth.GoogleAuth({
     credentials: {
