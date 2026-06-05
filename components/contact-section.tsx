@@ -171,7 +171,7 @@ export function ContactSection() {
       const data = new FormData()
       Object.entries(formData).forEach(([k, v]) => data.append(k, v))
       files.forEach((f) => data.append("files", f))
-      const res = await fetch("/api/upload", { method: "POST", body: data })
+      const res = await fetch("/api/upload-to-drive", { method: "POST", body: data })
       if (!res.ok) {
         const json = await res.json().catch(() => ({}))
         throw new Error(json.error || "Upload fehlgeschlagen")
@@ -189,15 +189,21 @@ export function ContactSection() {
         <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
           <div
             className="flex flex-col items-center gap-6 rounded-2xl border p-12 text-center shadow-sm"
-            style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }}
+            style={{ backgroundColor: "#ffffff", borderColor: "#bbf7d0" }}
           >
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/20">
-              <Check className="h-8 w-8 text-emerald-400" />
+            <div className="flex h-16 w-16 items-center justify-center rounded-full" style={{ backgroundColor: "#dcfce7" }}>
+              <Check className="h-8 w-8" style={{ color: "#16a34a" }} />
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-white">Vielen Dank, {formData.vorname}!</h3>
-              <p className="mt-2 text-slate-400">
-                Ihre Anfrage wurde erfolgreich übermittelt. Wir prüfen Ihre Dokumente und melden uns innerhalb von 1–2 Werktagen.
+              <h3 className="text-2xl font-bold" style={{ color: "#0B192C" }}>
+                Übertragung erfolgreich
+              </h3>
+              <p className="mt-3" style={{ color: "#475569" }}>
+                Ihr geschützter Datenraum <strong style={{ color: "#0B192C" }}>{formData.unternehmen}</strong> wurde angelegt.
+                Ihre Potenzialeinschätzung wird vorbereitet.
+              </p>
+              <p className="mt-3 text-sm" style={{ color: "#64748b" }}>
+                Wir prüfen Ihre Dokumente und melden uns innerhalb von 1–2 Werktagen.
               </p>
             </div>
             <button
@@ -434,9 +440,9 @@ export function ContactSection() {
                   </div>
 
                   {uploadStatus === "error" && (
-                    <div className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-400">
+                    <div className="flex items-center gap-2 rounded-lg border px-4 py-3 text-sm" style={{ borderColor: "#fecaca", backgroundColor: "#fef2f2", color: "#991b1b" }}>
                       <AlertCircle className="h-4 w-4 shrink-0" />
-                      {errorMessage}
+                      <span>{errorMessage || "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut."}</span>
                     </div>
                   )}
 
@@ -454,7 +460,7 @@ export function ContactSection() {
                       className="flex items-center gap-2 rounded-lg bg-[#1E3A8A] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90 disabled:opacity-60"
                     >
                       {uploadStatus === "uploading" ? (
-                        <><span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> Wird gesendet...</>
+                        <><span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> Sicherer Upload-Kanal wird verschlüsselt aufgebaut...</>
                       ) : (
                         <><Upload className="h-4 w-4" /> Erstcheck starten</>
                       )}
