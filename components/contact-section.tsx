@@ -135,6 +135,7 @@ export function ContactSection() {
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>("idle")
   const [errorMessage, setErrorMessage] = useState("")
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const dragCounter = useRef(0)
 
   const set = (key: keyof FormData) => (v: string) => setFormData((p) => ({ ...p, [key]: v }))
 
@@ -143,16 +144,29 @@ export function ContactSection() {
       const existing = new Set(prev.map((f) => f.name + f.size))
       return [...prev, ...Array.from(newFiles).filter((f) => !existing.has(f.name + f.size))]
     })
+    setUploadStatus("idle")
+    setErrorMessage("")
   }, [])
 
-  const handleDrag = (e: React.DragEvent) => {
+  const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault(); e.stopPropagation()
-    if (e.type === "dragenter" || e.type === "dragover") setDragActive(true)
-    else if (e.type === "dragleave") setDragActive(false)
+    dragCounter.current++
+    setDragActive(true)
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault(); e.stopPropagation()
+    dragCounter.current--
+    if (dragCounter.current === 0) setDragActive(false)
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault(); e.stopPropagation()
   }
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault(); e.stopPropagation()
+    dragCounter.current = 0
     setDragActive(false)
     if (e.dataTransfer.files?.length) addFiles(e.dataTransfer.files)
   }
@@ -165,6 +179,11 @@ export function ContactSection() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (files.length === 0) {
+      setErrorMessage("Bitte laden Sie mindestens ein Dokument hoch.")
+      setUploadStatus("error")
+      return
+    }
     setUploadStatus("uploading")
     setErrorMessage("")
     try {
@@ -244,7 +263,7 @@ export function ContactSection() {
             className="rounded-2xl border p-8 shadow-sm"
             style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }}
           >
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} noValidate>
 
               {/* ── STEP 1: Kontakt ── */}
               {step === 1 && (
@@ -389,9 +408,9 @@ export function ContactSection() {
 
                   {/* Drag & drop zone */}
                   <div
-                    onDragEnter={handleDrag}
-                    onDragOver={handleDrag}
-                    onDragLeave={handleDrag}
+                    onDragEnter={handleDragEnter}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
                     onClick={() => fileInputRef.current?.click()}
                     className={`flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed px-6 py-10 text-center transition-colors ${
@@ -414,18 +433,26 @@ export function ContactSection() {
                   </div>
 
                   {files.length > 0 && (
-                    <ul className="flex flex-col gap-1.5">
-                      {files.map((file, i) => (
-                        <li key={i} className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
-                          <FileText className="h-4 w-4 shrink-0 text-slate-400" />
-                          <span className="flex-1 truncate text-slate-700">{file.name}</span>
-                          <span className="shrink-0 text-xs text-slate-500">{formatFileSize(file.size)}</span>
-                          <button type="button" onClick={() => setFiles((p) => p.filter((_, j) => j !== i))} className="shrink-0 text-slate-500 hover:text-red-400">
-                            <X className="h-3.5 w-3.5" />
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
+                    <div className="rounded-xl border p-4" style={{ backgroundColor: "#f0fdf4", borderColor: "#bbf7d0" }}>
+                      <div className="mb-2 flex items-center gap-2">
+                        <Check className="h-4 w-4" style={{ color: "#16a34a" }} />
+                        <span className="text-sm font-medium" style={{ color: "#14532d" }}>
+                          {files.length} {files.length === 1 ? "Datei" : "Dateien"} ausgewählt
+                        </span>
+                      </div>
+                      <ul className="flex flex-col gap-1.5">
+                        {files.map((file, i) => (
+                          <li key={i} className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm">
+                            <FileText className="h-4 w-4 shrink-0" style={{ color: "#1E3A8A" }} />
+                            <span className="flex-1 truncate text-slate-700">{file.name}</span>
+                            <span className="shrink-0 text-xs text-slate-500">{formatFileSize(file.size)}</span>
+                            <button type="button" onClick={() => setFiles((p) => p.filter((_, j) => j !== i))} className="shrink-0 text-slate-400 transition-colors hover:text-red-500">
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   )}
 
                   <div className="flex flex-col gap-1.5">
@@ -456,8 +483,8 @@ export function ContactSection() {
                     </button>
                     <button
                       type="submit"
-                      disabled={uploadStatus === "uploading"}
-                      className="flex items-center gap-2 rounded-lg bg-[#1E3A8A] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90 disabled:opacity-60"
+                      disabled={uploadStatus === "uploading" || files.length === 0}
+                      className="flex items-center gap-2 rounded-lg bg-[#1E3A8A] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       {uploadStatus === "uploading" ? (
                         <><span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> Sicherer Upload-Kanal wird verschlüsselt aufgebaut...</>
