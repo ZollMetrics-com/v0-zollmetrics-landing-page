@@ -7,21 +7,17 @@ export const config = {
   },
 }
 
-async function getDriveClient() {
-  // Sanitize private key to fix "error:1E08010C:DECODER routines::unsupported"
-  const rawKey = process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY
-  const privateKey = rawKey
-    ? rawKey.replace(/\\n/g, '\n').replace(/^"(.*)"$/, '$1')
-    : undefined
-
+function getDriveClient() {
   const auth = new google.auth.GoogleAuth({
     credentials: {
       client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-      private_key: privateKey,
+      private_key: (process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY || '').replace(/\\n/g, '\n').replace(/^["']|["']$/g, ''),
     },
-    scopes: ["https://www.googleapis.com/auth/drive"],
+    scopes: ['https://www.googleapis.com/auth/drive.file', 'https://www.googleapis.com/auth/drive'],
   })
-  return google.drive({ version: "v3", auth })
+
+  const drive = google.drive({ version: 'v3', auth })
+  return drive
 }
 
 async function createFolder(drive: ReturnType<typeof google.drive>, name: string, parentId: string) {
@@ -117,7 +113,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, folderId })
   } catch (err: unknown) {
-    console.error("Secure storage upload error:", err)
+    // Log full error details for Vercel debugging
+    const errorMessage = err instanceof Error ? err.message : String(err)
+    const errorStack = err instanceof Error ? err.stack : undefined
+    console.error("Secure storage upload error:", { message: errorMessage, stack: errorStack, raw: err })
+    
     // Professional error message without mentioning internal services
     return NextResponse.json(
       { error: "Fehler bei der Datenübertragung: Der gesicherte Validierungs-Server konnte keine stabile Verbindung aufbauen. Bitte versuchen Sie es in wenigen Minuten erneut oder kontaktieren Sie Ihren Betreuer." },
