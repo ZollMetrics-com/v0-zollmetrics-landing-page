@@ -2,16 +2,25 @@ import { NextRequest, NextResponse } from "next/server"
 import { google } from "googleapis"
 
 function getDriveClient() {
-  // Absolut native Übergabe – GoogleAuth bereinigt Keys intern fehlerfrei
+  const base64Key = process.env.GOOGLE_PRIVATE_KEY || '';
+  let decodedKey = '';
+  
+  // Wenn der Key bereits im Klartext vorliegt, nutze ihn, andernfalls entpacke das Base64
+  if (base64Key.includes('-----BEGIN PRIVATE KEY-----')) {
+    decodedKey = base64Key;
+  } else {
+    decodedKey = Buffer.from(base64Key, 'base64').toString('utf-8');
+  }
+
   const auth = new google.auth.GoogleAuth({
     credentials: {
       client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-      private_key: process.env.GOOGLE_PRIVATE_KEY,
+      private_key: decodedKey,
     },
     scopes: ['https://www.googleapis.com/auth/drive.file', 'https://www.googleapis.com/auth/drive'],
-  })
+  });
 
-  return google.drive({ version: 'v3', auth })
+  return google.drive({ version: 'v3', auth });
 }
 
 async function createSubfolder(
@@ -65,7 +74,6 @@ export async function POST(req: NextRequest) {
 
     const formData = await req.formData()
 
-    // Formular-Felder auslesen
     const company = (formData.get("unternehmen") as string | null)?.trim()
     const vorname = (formData.get("vorname") as string | null)?.trim() ?? ""
     const nachname = (formData.get("nachname") as string | null)?.trim() ?? ""
@@ -90,7 +98,6 @@ export async function POST(req: NextRequest) {
 
     const drive = getDriveClient()
 
-    // Unterordner erstellen: "Unternehmensname - DD.MM.YYYY"
     const now = new Date()
     const day = String(now.getDate()).padStart(2, "0")
     const month = String(now.getMonth() + 1).padStart(2, "0")
@@ -99,7 +106,6 @@ export async function POST(req: NextRequest) {
     const subfolderName = `${company} - ${dateStr}`
     const subfolderId = await createSubfolder(drive, subfolderName, rootFolderId)
 
-    // Kontaktdaten als .txt-Datei aufbereiten
     const metaContent = [
       `Eingang: ${now.toLocaleString("de-DE")}`,
       ``,
@@ -136,7 +142,6 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    // Dokumente hochladen
     const validFiles = files.filter((f) => f.size > 0)
     await Promise.all(
       validFiles.map((file) => uploadFileToDrive(drive, file, subfolderId))
