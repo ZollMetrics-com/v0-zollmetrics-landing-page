@@ -273,11 +273,15 @@ export function ContactSection() {
       const res = await fetch("/api/upload-to-drive", { method: "POST", body: data })
       if (!res.ok) {
         const json = await res.json().catch(() => ({}))
-        throw new Error(json.error || "Upload fehlgeschlagen")
+        // Use our professional error message if the server returns one, otherwise use generic
+        throw new Error(json.error || "Fehler bei der Datenübertragung: Der gesicherte Validierungs-Server konnte keine stabile Verbindung aufbauen. Bitte versuchen Sie es in wenigen Minuten erneut oder kontaktieren Sie Ihren Betreuer.")
       }
       setUploadStatus("success")
     } catch (err: unknown) {
-      setErrorMessage(err instanceof Error ? err.message : "Unbekannter Fehler")
+      const message = err instanceof Error 
+        ? err.message 
+        : "Fehler bei der Datenübertragung: Der gesicherte Validierungs-Server konnte keine stabile Verbindung aufbauen. Bitte versuchen Sie es in wenigen Minuten erneut oder kontaktieren Sie Ihren Betreuer."
+      setErrorMessage(message)
       setUploadStatus("error")
     }
   }
@@ -300,8 +304,8 @@ export function ContactSection() {
                 Übertragung erfolgreich
               </h3>
               <p className="mt-3" style={{ color: "#475569" }}>
-                Ihr geschützter Datenraum <strong style={{ color: "#0B192C" }}>{formData.unternehmen}</strong> wurde angelegt.
-                Ihre Potenzialeinschätzung wird vorbereitet.
+                Ihr geschützter Datenraum <strong style={{ color: "#0B192C" }}>{formData.unternehmen}</strong> wurde aktualisiert.
+                Unsere Experten wurden benachrichtigt.
               </p>
               <p className="mt-3 text-sm" style={{ color: "#64748b" }}>
                 Wir prüfen Ihre Dokumente und melden uns innerhalb von 1–2 Werktagen.
@@ -586,7 +590,7 @@ export function ContactSection() {
                       }`}
                     >
                       {uploadStatus === "uploading" ? (
-                        <><span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> Sicherer Upload-Kanal wird verschlüsselt aufgebaut...</>
+                        <><span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> Verbindung zum gesicherten Server-Netzwerk wird verschlüsselt aufgebaut...</>
                       ) : (
                         <><Upload className="h-4 w-4" /> Erstcheck starten</>
                       )}

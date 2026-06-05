@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from "next/server"
 import { google } from "googleapis"
 
-async function getDriveClient() {
+function getDriveClient() {
+  // Absolut native Übergabe – GoogleAuth bereinigt Keys intern fehlerfrei
   const auth = new google.auth.GoogleAuth({
     credentials: {
-      client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL!,
-      private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+      client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+      private_key: process.env.GOOGLE_PRIVATE_KEY,
     },
-    scopes: ["https://www.googleapis.com/auth/drive"],
+    scopes: ['https://www.googleapis.com/auth/drive.file', 'https://www.googleapis.com/auth/drive'],
   })
-  return google.drive({ version: "v3", auth })
+
+  return google.drive({ version: 'v3', auth })
 }
 
 async function createSubfolder(
@@ -56,14 +58,14 @@ export async function POST(req: NextRequest) {
     const rootFolderId = process.env.GOOGLE_DRIVE_FOLDER_ID
     if (!rootFolderId) {
       return NextResponse.json(
-        { error: "Google Drive ist nicht konfiguriert." },
+        { error: "Der gesicherte Datenraum ist derzeit nicht verfügbar. Bitte kontaktieren Sie Ihren Betreuer." },
         { status: 503 }
       )
     }
 
     const formData = await req.formData()
 
-    // Extract all form fields
+    // Formular-Felder auslesen
     const company = (formData.get("unternehmen") as string | null)?.trim()
     const vorname = (formData.get("vorname") as string | null)?.trim() ?? ""
     const nachname = (formData.get("nachname") as string | null)?.trim() ?? ""
@@ -86,9 +88,9 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const drive = await getDriveClient()
+    const drive = getDriveClient()
 
-    // Create subfolder: "Unternehmensname - DD.MM.YYYY"
+    // Unterordner erstellen: "Unternehmensname - DD.MM.YYYY"
     const now = new Date()
     const day = String(now.getDate()).padStart(2, "0")
     const month = String(now.getMonth() + 1).padStart(2, "0")
@@ -97,7 +99,7 @@ export async function POST(req: NextRequest) {
     const subfolderName = `${company} - ${dateStr}`
     const subfolderId = await createSubfolder(drive, subfolderName, rootFolderId)
 
-    // Save contact + import metadata as a text file in the subfolder
+    // Kontaktdaten als .txt-Datei aufbereiten
     const metaContent = [
       `Eingang: ${now.toLocaleString("de-DE")}`,
       ``,
@@ -134,7 +136,7 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    // Upload all document files into the subfolder
+    // Dokumente hochladen
     const validFiles = files.filter((f) => f.size > 0)
     await Promise.all(
       validFiles.map((file) => uploadFileToDrive(drive, file, subfolderId))
@@ -146,8 +148,13 @@ export async function POST(req: NextRequest) {
       fileCount: validFiles.length,
     })
   } catch (err: unknown) {
-    console.error("Google Drive upload error:", err)
-    const message = err instanceof Error ? err.message : "Unbekannter Fehler"
-    return NextResponse.json({ error: message }, { status: 500 })
+    const errorMessage = err instanceof Error ? err.message : String(err)
+    const errorStack = err instanceof Error ? err.stack : undefined
+    console.error("Secure storage upload error:", { message: errorMessage, stack: errorStack, raw: err })
+    
+    return NextResponse.json(
+      { error: "Fehler bei der Datenübertragung: Der gesicherte Validierungs-Server konnte keine stabile Verbindung aufbauen. Bitte versuchen Sie es in wenigen Minuten erneut oder kontaktieren Sie Ihren Betreuer." },
+      { status: 500 }
+    )
   }
 }
