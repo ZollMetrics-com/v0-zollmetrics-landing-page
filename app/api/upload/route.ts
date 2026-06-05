@@ -8,10 +8,16 @@ export const config = {
 }
 
 async function getDriveClient() {
+  // Sanitize private key to fix "error:1E08010C:DECODER routines::unsupported"
+  const rawKey = process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY
+  const privateKey = rawKey
+    ? rawKey.replace(/\\n/g, '\n').replace(/^"(.*)"$/, '$1')
+    : undefined
+
   const auth = new google.auth.GoogleAuth({
     credentials: {
       client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-      private_key: process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+      private_key: privateKey,
     },
     scopes: ["https://www.googleapis.com/auth/drive"],
   })
@@ -58,7 +64,7 @@ export async function POST(req: NextRequest) {
     const rootFolderId = process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID
     if (!rootFolderId) {
       return NextResponse.json(
-        { error: "Google Drive ist nicht konfiguriert." },
+        { error: "Der gesicherte Datenraum ist derzeit nicht verfügbar. Bitte kontaktieren Sie Ihren Betreuer." },
         { status: 503 }
       )
     }
@@ -111,8 +117,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, folderId })
   } catch (err: unknown) {
-    console.error("Google Drive upload error:", err)
-    const message = err instanceof Error ? err.message : "Unbekannter Fehler"
-    return NextResponse.json({ error: message }, { status: 500 })
+    console.error("Secure storage upload error:", err)
+    // Professional error message without mentioning internal services
+    return NextResponse.json(
+      { error: "Fehler bei der Datenübertragung: Der gesicherte Validierungs-Server konnte keine stabile Verbindung aufbauen. Bitte versuchen Sie es in wenigen Minuten erneut oder kontaktieren Sie Ihren Betreuer." },
+      { status: 500 }
+    )
   }
 }
