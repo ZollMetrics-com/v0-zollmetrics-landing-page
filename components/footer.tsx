@@ -28,16 +28,26 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-6 w-6 items-center justify-center rounded-md" style={{ backgroundColor: "#1a4fa8" }}>
-              <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-                <rect x="2" y="8" width="3" height="6" rx="0.5" fill="white" />
-                <rect x="6.5" y="5" width="3" height="9" rx="0.5" fill="white" />
-                <rect x="11" y="2" width="3" height="12" rx="0.5" fill="white" />
-              </svg>
-            </div>
-            <span className="text-sm font-bold text-white">
-              Zoll<span style={{ color: "#5b8def" }}>Metrics</span>
-            </span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 80" width="120" height="26" className="shrink-0">
+              <defs>
+                <linearGradient id="footerPrimaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#ffffff" />
+                  <stop offset="100%" stopColor="#94a3b8" />
+                </linearGradient>
+                <linearGradient id="footerAccentGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#00ADB5" />
+                  <stop offset="100%" stopColor="#007A80" />
+                </linearGradient>
+              </defs>
+              <g transform="translate(15, 10)">
+                <rect x="0" y="20" width="12" height="35" rx="4" fill="url(#footerPrimaryGrad)" />
+                <rect x="18" y="30" width="12" height="25" rx="4" fill="#94a3b8" opacity="0.8" />
+                <rect x="36" y="10" width="12" height="45" rx="4" fill="url(#footerAccentGrad)" />
+                <circle cx="24" cy="14" r="4.5" fill="url(#footerAccentGrad)" />
+              </g>
+              <text x="85" y="50" fontFamily="'Inter', 'Segoe UI', sans-serif" fontWeight="800" fontSize="32" fill="#ffffff" letterSpacing="-0.5">Zoll</text>
+              <text x="154" y="50" fontFamily="'Inter', 'Segoe UI', sans-serif" fontWeight="300" fontSize="32" fill="#94a3b8" letterSpacing="-0.5">Metrics</text>
+            </svg>
             <span className="ml-2 text-sm text-slate-500">&copy; 2026. Alle Rechte vorbehalten.</span>
           </div>
 

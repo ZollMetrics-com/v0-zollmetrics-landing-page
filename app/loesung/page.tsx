@@ -1,6 +1,6 @@
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
-import { Tag, DollarSign, Globe, Truck, RotateCcw, TrendingUp } from "lucide-react"
+import { Tag, DollarSign, Globe, Truck, RotateCcw, TrendingUp, FileSearch, Users } from "lucide-react"
 import Link from "next/link"
 
 export const metadata = {
@@ -43,9 +43,9 @@ const checkAreas = [
 
 function PageHeader({ eyebrow, title, subtitle }: { eyebrow: string; title: string; subtitle: string }) {
   return (
-    <section className="border-b pt-16" style={{ backgroundColor: "#f8fafc", borderBottomColor: "#e2e8f0" }}>
+    <section className="border-b pt-16" style={{ backgroundColor: "#F8F9FA", borderBottomColor: "#e2e8f0" }}>
       <div className="mx-auto max-w-4xl px-4 py-16 text-center sm:px-6 lg:px-8">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-widest" style={{ color: "#1a4fa8" }}>{eyebrow}</p>
+        <p className="mb-3 text-xs font-semibold uppercase tracking-widest" style={{ color: "#1E3A8A" }}>{eyebrow}</p>
         <h1 className="mb-4 text-4xl font-bold md:text-5xl" style={{ color: "#0B192C" }}>{title}</h1>
         <p className="mx-auto max-w-2xl text-lg" style={{ color: "#475569" }}>{subtitle}</p>
       </div>
@@ -78,9 +78,9 @@ export default function LoesungPage() {
                       className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
                       style={{ backgroundColor: "#eef3fc" }}
                     >
-                      <area.icon className="h-5 w-5" style={{ color: "#1a4fa8" }} />
+                      <area.icon className="h-5 w-5" style={{ color: "#1E3A8A" }} />
                     </div>
-                    <span className="text-xs font-bold" style={{ color: "#1a4fa8" }}>0{i + 1}</span>
+                    <span className="text-xs font-bold" style={{ color: "#1E3A8A" }}>0{i + 1}</span>
                   </div>
                   <h3 className="mb-2 font-semibold" style={{ color: "#0B192C" }}>{area.title}</h3>
                   <p className="text-sm leading-relaxed" style={{ color: "#64748b" }}>{area.desc}</p>
@@ -90,8 +90,49 @@ export default function LoesungPage() {
           </div>
         </section>
 
+        {/* Human + Tech Section */}
+        <section className="border-t py-16 md:py-24" style={{ backgroundColor: "#F8F9FA", borderTopColor: "#e2e8f0" }}>
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-widest" style={{ color: "#1E3A8A" }}>
+                Mensch + Technologie
+              </p>
+              <h2 className="mb-6 text-3xl font-bold md:text-4xl" style={{ color: "#0B192C" }}>
+                Proprietäre Daten-Engine trifft auf menschliche Zoll-Expertise
+              </h2>
+              <p className="text-lg leading-relaxed" style={{ color: "#475569" }}>
+                Unsere hochentwickelte Analyse-Software scannt Ihre Importdaten in wenigen Sekunden auf
+                strukturelle Abweichungen und Unstimmigkeiten. Um Fehlalarme auszuschließen, wird jedes
+                identifizierte Potenzial anschließend von unseren erfahrenen deutschen Zollexperten manuell
+                verifiziert, bevor Sie Ihre Potenzialeinschätzung erhalten. Maximale Sicherheit, null Risiko.
+              </p>
+            </div>
+
+            <div className="mt-12 grid gap-8 md:grid-cols-2">
+              <div className="flex flex-col items-center gap-4 rounded-xl border p-8 text-center" style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }}>
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ backgroundColor: "#eef3fc" }}>
+                  <FileSearch className="h-6 w-6" style={{ color: "#1E3A8A" }} />
+                </div>
+                <h3 className="text-lg font-semibold" style={{ color: "#0B192C" }}>Automatisierte Daten-Analyse</h3>
+                <p className="text-sm leading-relaxed" style={{ color: "#64748b" }}>
+                  Proprietäre Algorithmen scannen Tarifnummern, Zollwerte, Präferenzen und Abrechnungen in Sekunden – über alle Ihre Sendungen hinweg.
+                </p>
+              </div>
+              <div className="flex flex-col items-center gap-4 rounded-xl border p-8 text-center" style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }}>
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ backgroundColor: "#eef3fc" }}>
+                  <Users className="h-6 w-6" style={{ color: "#1E3A8A" }} />
+                </div>
+                <h3 className="text-lg font-semibold" style={{ color: "#0B192C" }}>Manuelle Experten-Verifikation</h3>
+                <p className="text-sm leading-relaxed" style={{ color: "#64748b" }}>
+                  Jede Auffälligkeit wird von erfahrenen deutschen Zollexperten geprüft, falsch-positive Ergebnisse ausgeschlossen und nur belastbare Prüffälle übermittelt.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* CTA */}
-        <section className="border-t py-16" style={{ backgroundColor: "#f8fafc", borderTopColor: "#e2e8f0" }}>
+        <section className="border-t py-16" style={{ backgroundColor: "#F8F9FA", borderTopColor: "#e2e8f0" }}>
           <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
             <h2 className="mb-4 text-2xl font-bold md:text-3xl" style={{ color: "#0B192C" }}>
               Bereit für Ihre kostenlose Potenzialanalyse?
@@ -102,7 +143,7 @@ export default function LoesungPage() {
             <Link
               href="/#scan"
               className="inline-flex items-center rounded-lg px-6 py-3 font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
-              style={{ backgroundColor: "#1a4fa8" }}
+              style={{ backgroundColor: "#1E3A8A" }}
             >
               Kostenlose Potenzialanalyse starten
             </Link>

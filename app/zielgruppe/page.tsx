@@ -27,7 +27,7 @@ function PageHeader({ eyebrow, title, subtitle }: { eyebrow: string; title: stri
   return (
     <section className="border-b pt-16" style={{ backgroundColor: "#f8fafc", borderBottomColor: "#e2e8f0" }}>
       <div className="mx-auto max-w-4xl px-4 py-16 text-center sm:px-6 lg:px-8">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-widest" style={{ color: "#1a4fa8" }}>{eyebrow}</p>
+        <p className="mb-3 text-xs font-semibold uppercase tracking-widest" style={{ color: "#1E3A8A" }}>{eyebrow}</p>
         <h1 className="mb-4 text-4xl font-bold md:text-5xl" style={{ color: "#0B192C" }}>{title}</h1>
         <p className="mx-auto max-w-2xl text-lg" style={{ color: "#475569" }}>{subtitle}</p>
       </div>
@@ -113,7 +113,7 @@ export default function ZielgruppePage() {
             <Link
               href="/#scan"
               className="inline-flex items-center rounded-lg px-6 py-3 font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
-              style={{ backgroundColor: "#1a4fa8" }}
+              style={{ backgroundColor: "#1E3A8A" }}
             >
               Kostenlose Potenzialanalyse starten
             </Link>

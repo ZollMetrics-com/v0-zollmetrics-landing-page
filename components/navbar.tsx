@@ -64,23 +64,33 @@ export function Navbar() {
   return (
     <nav
       className={`fixed top-0 z-50 w-full border-b transition-shadow duration-200 ${scrolled ? "shadow-sm" : ""}`}
-      style={{ backgroundColor: "#ffffff", borderBottomColor: "#e5e7eb" }}
+      style={{ backgroundColor: "#F8F9FA", borderBottomColor: "#e5e7eb" }}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md" style={{ backgroundColor: "#1a4fa8" }}>
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <rect x="2" y="8" width="3" height="6" rx="0.5" fill="white" />
-                <rect x="6.5" y="5" width="3" height="9" rx="0.5" fill="white" />
-                <rect x="11" y="2" width="3" height="12" rx="0.5" fill="white" />
-              </svg>
-            </div>
-            <span className="text-lg font-bold" style={{ color: "#0B192C" }}>
-              Zoll<span style={{ color: "#1a4fa8" }}>Metrics</span>
-            </span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 80" width="140" height="30" className="shrink-0">
+              <defs>
+                <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#0B192C" />
+                  <stop offset="100%" stopColor="#1E3A8A" />
+                </linearGradient>
+                <linearGradient id="accentGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#00ADB5" />
+                  <stop offset="100%" stopColor="#007A80" />
+                </linearGradient>
+              </defs>
+              <g transform="translate(15, 10)">
+                <rect x="0" y="20" width="12" height="35" rx="4" fill="url(#primaryGrad)" />
+                <rect x="18" y="30" width="12" height="25" rx="4" fill="#1E3A8A" opacity="0.8" />
+                <rect x="36" y="10" width="12" height="45" rx="4" fill="url(#accentGrad)" />
+                <circle cx="24" cy="14" r="4.5" fill="url(#accentGrad)" />
+              </g>
+              <text x="85" y="50" fontFamily="'Inter', 'Segoe UI', sans-serif" fontWeight="800" fontSize="32" fill="#0B192C" letterSpacing="-0.5">Zoll</text>
+              <text x="154" y="50" fontFamily="'Inter', 'Segoe UI', sans-serif" fontWeight="300" fontSize="32" fill="#1E3A8A" letterSpacing="-0.5">Metrics</text>
+            </svg>
           </Link>
 
           {/* Desktop nav */}
@@ -95,7 +105,7 @@ export function Navbar() {
                 <Link
                   href={menu.href}
                   className="flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-slate-100"
-                  style={{ color: activeDropdown === menu.label ? "#1a4fa8" : "#374151" }}
+                  style={{ color: activeDropdown === menu.label ? "#1E3A8A" : "#374151" }}
                 >
                   {menu.label}
                   <ChevronDown
@@ -137,7 +147,7 @@ export function Navbar() {
             <Link
               href="/#scan"
               className="inline-flex items-center rounded-lg px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
-              style={{ backgroundColor: "#1a4fa8" }}
+              style={{ backgroundColor: "#1E3A8A" }}
             >
               Zoll-Audit starten
             </Link>
@@ -194,7 +204,7 @@ export function Navbar() {
               href="/#scan"
               onClick={() => setMobileOpen(false)}
               className="mb-2 mt-3 inline-flex w-full items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold text-white"
-              style={{ backgroundColor: "#1a4fa8" }}
+              style={{ backgroundColor: "#1E3A8A" }}
             >
               Zoll-Audit starten
             </Link>

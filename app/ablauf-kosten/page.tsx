@@ -60,9 +60,9 @@ const pricingCards = [
 
 function PageHeader({ eyebrow, title, subtitle }: { eyebrow: string; title: string; subtitle: string }) {
   return (
-    <section className="border-b pt-16" style={{ backgroundColor: "#f8fafc", borderBottomColor: "#e2e8f0" }}>
+    <section className="border-b pt-16" style={{ backgroundColor: "#F8F9FA", borderBottomColor: "#e2e8f0" }}>
       <div className="mx-auto max-w-4xl px-4 py-16 text-center sm:px-6 lg:px-8">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-widest" style={{ color: "#1a4fa8" }}>{eyebrow}</p>
+        <p className="mb-3 text-xs font-semibold uppercase tracking-widest" style={{ color: "#1E3A8A" }}>{eyebrow}</p>
         <h1 className="mb-4 text-4xl font-bold md:text-5xl" style={{ color: "#0B192C" }}>{title}</h1>
         <p className="mx-auto max-w-2xl text-lg" style={{ color: "#475569" }}>{subtitle}</p>
       </div>
@@ -90,7 +90,7 @@ export default function AblaufKostenPage() {
                   <div className="flex flex-col items-center">
                     <div
                       className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white shadow-sm"
-                      style={{ backgroundColor: "#1a4fa8" }}
+                      style={{ backgroundColor: "#1E3A8A" }}
                     >
                       {item.step}
                     </div>
@@ -100,7 +100,7 @@ export default function AblaufKostenPage() {
                   </div>
                   <div
                     className="mb-5 flex-1 rounded-xl border p-6 shadow-sm"
-                    style={{ backgroundColor: "#f8fafc", borderColor: "#e2e8f0" }}
+                    style={{ backgroundColor: "#F8F9FA", borderColor: "#e2e8f0" }}
                   >
                     <h3 className="mb-1.5 font-semibold" style={{ color: "#0B192C" }}>{item.title}</h3>
                     <p className="text-sm leading-relaxed" style={{ color: "#64748b" }}>{item.desc}</p>
@@ -112,10 +112,10 @@ export default function AblaufKostenPage() {
         </section>
 
         {/* Pricing */}
-        <section id="preise" className="border-t py-16 md:py-24" style={{ backgroundColor: "#f8fafc", borderTopColor: "#e2e8f0" }}>
+        <section id="preise" className="border-t py-16 md:py-24" style={{ backgroundColor: "#F8F9FA", borderTopColor: "#e2e8f0" }}>
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mb-12 text-center">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-widest" style={{ color: "#1a4fa8" }}>Kostenmodell</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-widest" style={{ color: "#1E3A8A" }}>Kostenmodell</p>
               <h2 className="text-3xl font-bold md:text-4xl" style={{ color: "#0B192C" }}>
                 Kostenloser Erstcheck. Vergütung nur bei Ergebnis.
               </h2>
@@ -128,10 +128,10 @@ export default function AblaufKostenPage() {
                   className={`rounded-xl p-8 ${card.highlight ? "shadow-md" : "shadow-sm"}`}
                   style={{
                     backgroundColor: "#ffffff",
-                    border: card.highlight ? "2px solid #1a4fa8" : "1px solid #e2e8f0",
+                    border: card.highlight ? "2px solid #1E3A8A" : "1px solid #e2e8f0",
                   }}
                 >
-                  <div className="mb-1 text-xs font-semibold uppercase tracking-widest" style={{ color: "#1a4fa8" }}>
+                  <div className="mb-1 text-xs font-semibold uppercase tracking-widest" style={{ color: "#1E3A8A" }}>
                     {card.badge}
                   </div>
                   <div className="mb-1 text-base font-semibold" style={{ color: "#475569" }}>{card.title}</div>
@@ -140,7 +140,7 @@ export default function AblaufKostenPage() {
                   <ul className="flex flex-col gap-2.5">
                     {card.features.map((f) => (
                       <li key={f} className="flex items-start gap-2 text-sm" style={{ color: "#334155" }}>
-                        <Check className="mt-0.5 h-4 w-4 shrink-0" style={{ color: "#1a4fa8" }} />
+                        <Check className="mt-0.5 h-4 w-4 shrink-0" style={{ color: "#1E3A8A" }} />
                         {f}
                       </li>
                     ))}
@@ -163,7 +163,7 @@ export default function AblaufKostenPage() {
             <Link
               href="/#scan"
               className="inline-flex items-center rounded-lg px-6 py-3 font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
-              style={{ backgroundColor: "#1a4fa8" }}
+              style={{ backgroundColor: "#1E3A8A" }}
             >
               Kostenlose Potenzialanalyse starten
             </Link>

@@ -68,9 +68,9 @@ const faqs = [
 
 function PageHeader({ eyebrow, title, subtitle }: { eyebrow: string; title: string; subtitle: string }) {
   return (
-    <section className="border-b pt-16" style={{ backgroundColor: "#f8fafc", borderBottomColor: "#e2e8f0" }}>
+    <section className="border-b pt-16" style={{ backgroundColor: "#F8F9FA", borderBottomColor: "#e2e8f0" }}>
       <div className="mx-auto max-w-4xl px-4 py-16 text-center sm:px-6 lg:px-8">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-widest" style={{ color: "#1a4fa8" }}>{eyebrow}</p>
+        <p className="mb-3 text-xs font-semibold uppercase tracking-widest" style={{ color: "#1E3A8A" }}>{eyebrow}</p>
         <h1 className="mb-4 text-4xl font-bold md:text-5xl" style={{ color: "#0B192C" }}>{title}</h1>
         <p className="mx-auto max-w-2xl text-lg" style={{ color: "#475569" }}>{subtitle}</p>
       </div>
@@ -99,16 +99,16 @@ export default function SicherheitPage() {
                 <div
                   key={point.number}
                   className="flex gap-5 rounded-xl border p-6 shadow-sm"
-                  style={{ backgroundColor: "#f8fafc", borderColor: "#e2e8f0" }}
+                  style={{ backgroundColor: "#F8F9FA", borderColor: "#e2e8f0" }}
                 >
                   <div className="flex flex-col items-center gap-2">
                     <div
                       className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
                       style={{ backgroundColor: "#eef3fc" }}
                     >
-                      <point.icon className="h-5 w-5" style={{ color: "#1a4fa8" }} />
+                      <point.icon className="h-5 w-5" style={{ color: "#1E3A8A" }} />
                     </div>
-                    <span className="text-xs font-bold" style={{ color: "#1a4fa8" }}>{point.number}</span>
+                    <span className="text-xs font-bold" style={{ color: "#1E3A8A" }}>{point.number}</span>
                   </div>
                   <div className="pt-0.5">
                     <h3 className="mb-1 font-semibold" style={{ color: "#0B192C" }}>{point.title}</h3>
@@ -121,7 +121,7 @@ export default function SicherheitPage() {
         </section>
 
         {/* What we don't claim */}
-        <section className="border-t py-16" style={{ backgroundColor: "#f8fafc", borderTopColor: "#e2e8f0" }}>
+        <section className="border-t py-16" style={{ backgroundColor: "#F8F9FA", borderTopColor: "#e2e8f0" }}>
           <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             <div
               className="rounded-xl border p-8 shadow-sm"
@@ -154,7 +154,7 @@ export default function SicherheitPage() {
         <section id="faq" className="border-t py-16 md:py-24" style={{ backgroundColor: "#ffffff", borderTopColor: "#e2e8f0" }}>
           <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div className="mb-10 text-center">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-widest" style={{ color: "#1a4fa8" }}>FAQ</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-widest" style={{ color: "#1E3A8A" }}>FAQ</p>
               <h2 className="text-3xl font-bold" style={{ color: "#0B192C" }}>Fragen und Antworten</h2>
             </div>
 
@@ -175,7 +175,7 @@ export default function SicherheitPage() {
                     />
                   </button>
                   {openFaq === i && (
-                    <div className="border-t px-6 pb-5 pt-4" style={{ borderColor: "#f1f5f9", backgroundColor: "#f8fafc" }}>
+                    <div className="border-t px-6 pb-5 pt-4" style={{ borderColor: "#f1f5f9", backgroundColor: "#F8F9FA" }}>
                       <p className="text-sm leading-relaxed" style={{ color: "#475569" }}>{faq.a}</p>
                     </div>
                   )}
@@ -197,7 +197,7 @@ export default function SicherheitPage() {
             <Link
               href="/#scan"
               className="inline-flex items-center rounded-lg px-6 py-3 font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
-              style={{ backgroundColor: "#1a4fa8" }}
+              style={{ backgroundColor: "#1E3A8A" }}
             >
               Kostenlose Potenzialanalyse starten
             </Link>
