@@ -6,21 +6,18 @@ import { Check, Upload, X, FileText, CircleAlert as AlertCircle, ChevronRight, C
 type UploadStatus = "idle" | "uploading" | "success" | "error"
 
 interface FormData {
-  // Step 1 – Kontakt
   vorname: string
   nachname: string
   email: string
   unternehmen: string
   website: string
   rolle: string
-  // Step 2 – Importdaten
   importvorgaenge: string
   importvolumen: string
   herkunftslaender: string
   warengruppen: string
   zolldienstleister: string
   letzteZollpruefung: string
-  // Step 3 – Upload + Abschluss
   nachricht: string
 }
 
@@ -75,9 +72,9 @@ function StepIndicator({ current }: { current: number }) {
 }
 
 function Field({
-  label, required, hint, children,
+  label, required, hint, error, children,
 }: {
-  label: string; required?: boolean; hint?: string; children: React.ReactNode
+  label: string; required?: boolean; hint?: string; error?: string; children: React.ReactNode
 }) {
   return (
     <div className="flex flex-col gap-1.5">
@@ -86,14 +83,15 @@ function Field({
       </label>
       {children}
       {hint && <p className="text-xs text-[#1E3A8A]">{hint}</p>}
+      {error && <p className="text-xs text-red-600">{error}</p>}
     </div>
   )
 }
 
 function TextInput({
-  id, placeholder, value, onChange, type = "text", required,
+  id, placeholder, value, onChange, type = "text", required, error,
 }: {
-  id: string; placeholder: string; value: string; onChange: (v: string) => void; type?: string; required?: boolean
+  id: string; placeholder: string; value: string; onChange: (v: string) => void; type?: string; required?: boolean; error?: boolean
 }) {
   return (
     <input
@@ -103,7 +101,11 @@ function TextInput({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       required={required}
-      className="rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 transition-colors focus:border-[#1E3A8A] focus:outline-none focus:ring-1 focus:ring-[#1E3A8A]"
+      className={`rounded-md border px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 transition-colors focus:outline-none focus:ring-1 ${
+        error
+          ? "border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-500"
+          : "border-slate-300 bg-white focus:border-[#1E3A8A] focus:ring-[#1E3A8A]"
+      }`}
     />
   )
 }
@@ -127,6 +129,12 @@ function SelectInput({
   )
 }
 
+function formatFileSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
 export function ContactSection() {
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState<FormData>(EMPTY)
@@ -134,19 +142,35 @@ export function ContactSection() {
   const [dragActive, setDragActive] = useState(false)
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>("idle")
   const [errorMessage, setErrorMessage] = useState("")
+  const [validationErrors, setValidationErrors] = useState<Record<string, boolean>>({})
+
   const fileInputRef = useRef<HTMLInputElement>(null)
   const dragCounter = useRef(0)
 
-  const set = (key: keyof FormData) => (v: string) => setFormData((p) => ({ ...p, [key]: v }))
+  const set = (key: keyof FormData) => (v: string) => {
+    setFormData((p) => ({ ...p, [key]: v }))
+    if (v) setValidationErrors((p) => ({ ...p, [key]: false }))
+  }
 
-  const addFiles = useCallback((newFiles: FileList | File[]) => {
+  // ── File handlers ──
+
+  const addFiles = useCallback((newFiles: File[]) => {
     setFiles((prev) => {
       const existing = new Set(prev.map((f) => f.name + f.size))
-      return [...prev, ...Array.from(newFiles).filter((f) => !existing.has(f.name + f.size))]
+      return [...prev, ...newFiles.filter((f) => !existing.has(f.name + f.size))]
     })
     setUploadStatus("idle")
     setErrorMessage("")
   }, [])
+
+  const handleFileInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const fileList = e.target.files
+    if (fileList && fileList.length > 0) {
+      const filesArray = Array.from(fileList)
+      addFiles(filesArray)
+    }
+    e.target.value = ""
+  }, [addFiles])
 
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault(); e.stopPropagation()
@@ -168,19 +192,75 @@ export function ContactSection() {
     e.preventDefault(); e.stopPropagation()
     dragCounter.current = 0
     setDragActive(false)
-    if (e.dataTransfer.files?.length) addFiles(e.dataTransfer.files)
+    if (e.dataTransfer.files?.length) {
+      addFiles(Array.from(e.dataTransfer.files))
+    }
   }
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return `${bytes} B`
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  const removeFile = (index: number) => {
+    setFiles((prev) => prev.filter((_, j) => j !== index))
   }
+
+  const openFilePicker = () => {
+    fileInputRef.current?.click()
+  }
+
+  // ── Step navigation with validation ──
+
+  const step1Fields = ["vorname", "nachname", "email", "unternehmen"] as const
+
+  const validateStep1 = () => {
+    const errors: Record<string, boolean> = {}
+    let valid = true
+    for (const key of step1Fields) {
+      if (!formData[key]) {
+        errors[key] = true
+        valid = false
+      }
+    }
+    setValidationErrors((p) => ({ ...p, ...errors }))
+    return valid
+  }
+
+  const step2Fields = ["importvorgaenge", "importvolumen", "herkunftslaender", "warengruppen"] as const
+
+  const validateStep2 = () => {
+    const errors: Record<string, boolean> = {}
+    let valid = true
+    for (const key of step2Fields) {
+      if (!formData[key]) {
+        errors[key] = true
+        valid = false
+      }
+    }
+    setValidationErrors((p) => ({ ...p, ...errors }))
+    return valid
+  }
+
+  const goNext = () => {
+    if (step === 1 && validateStep1()) setStep(2)
+    else if (step === 2 && validateStep2()) setStep(3)
+  }
+
+  const goBack = () => {
+    setValidationErrors({})
+    if (step === 2) setStep(1)
+    else if (step === 3) setStep(2)
+  }
+
+  // ── Submit ──
+
+  const canSubmit = files.length > 0 && !!formData.unternehmen && uploadStatus !== "uploading"
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (files.length === 0) {
       setErrorMessage("Bitte laden Sie mindestens ein Dokument hoch.")
+      setUploadStatus("error")
+      return
+    }
+    if (!formData.unternehmen) {
+      setErrorMessage("Unternehmensname fehlt. Bitte gehen Sie zurück zu Schritt 1.")
       setUploadStatus("error")
       return
     }
@@ -201,6 +281,8 @@ export function ContactSection() {
       setUploadStatus("error")
     }
   }
+
+  // ── Success view ──
 
   if (uploadStatus === "success") {
     return (
@@ -226,7 +308,7 @@ export function ContactSection() {
               </p>
             </div>
             <button
-              onClick={() => { setUploadStatus("idle"); setStep(1); setFormData(EMPTY); setFiles([]) }}
+              onClick={() => { setUploadStatus("idle"); setStep(1); setFormData(EMPTY); setFiles([]); setValidationErrors({}) }}
               className="rounded-lg border border-slate-200 bg-slate-50 px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100"
             >
               Weitere Anfrage senden
@@ -236,6 +318,8 @@ export function ContactSection() {
       </section>
     )
   }
+
+  // ── Main form ──
 
   return (
     <section id="scan" className="border-t py-16 md:py-24" style={{ backgroundColor: "#F8F9FA", borderTopColor: "#e2e8f0" }}>
@@ -253,16 +337,23 @@ export function ContactSection() {
         </div>
 
         <div className="mx-auto max-w-2xl">
-          {/* Step indicator */}
           <div className="flex justify-center">
             <StepIndicator current={step} />
           </div>
 
-          {/* Form card */}
           <div
             className="rounded-2xl border p-8 shadow-sm"
             style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }}
           >
+            {/* Hidden file input lives OUTSIDE the clickable drop zone */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              className="hidden"
+              onChange={handleFileInputChange}
+            />
+
             <form onSubmit={handleSubmit} noValidate>
 
               {/* ── STEP 1: Kontakt ── */}
@@ -270,19 +361,19 @@ export function ContactSection() {
                 <div className="flex flex-col gap-5">
                   <h3 className="text-lg font-semibold" style={{ color: "#0B192C" }}>Ihre Kontaktdaten</h3>
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <Field label="Vorname" required>
-                      <TextInput id="vorname" placeholder="Max" value={formData.vorname} onChange={set("vorname")} required />
+                    <Field label="Vorname" required error={validationErrors.vorname ? "Pflichtfeld" : undefined}>
+                      <TextInput id="vorname" placeholder="Max" value={formData.vorname} onChange={set("vorname")} required error={validationErrors.vorname} />
                     </Field>
-                    <Field label="Nachname" required>
-                      <TextInput id="nachname" placeholder="Mustermann" value={formData.nachname} onChange={set("nachname")} required />
+                    <Field label="Nachname" required error={validationErrors.nachname ? "Pflichtfeld" : undefined}>
+                      <TextInput id="nachname" placeholder="Mustermann" value={formData.nachname} onChange={set("nachname")} required error={validationErrors.nachname} />
                     </Field>
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <Field label="Geschäftliche E-Mail" required>
-                      <TextInput id="email" type="email" placeholder="max@unternehmen.de" value={formData.email} onChange={set("email")} required />
+                    <Field label="Geschäftliche E-Mail" required error={validationErrors.email ? "Pflichtfeld" : undefined}>
+                      <TextInput id="email" type="email" placeholder="max@unternehmen.de" value={formData.email} onChange={set("email")} required error={validationErrors.email} />
                     </Field>
-                    <Field label="Unternehmen" required>
-                      <TextInput id="unternehmen" placeholder="Muster GmbH" value={formData.unternehmen} onChange={set("unternehmen")} required />
+                    <Field label="Unternehmen (Firmenname)" required error={validationErrors.unternehmen ? "Pflichtfeld – wird für Ihren Datenraum benötigt" : undefined}>
+                      <TextInput id="unternehmen" placeholder="Muster GmbH" value={formData.unternehmen} onChange={set("unternehmen")} required error={validationErrors.unternehmen} />
                     </Field>
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
@@ -296,7 +387,7 @@ export function ContactSection() {
                   <div className="flex justify-end pt-2">
                     <button
                       type="button"
-                      onClick={() => { if (formData.vorname && formData.nachname && formData.email && formData.unternehmen) setStep(2) }}
+                      onClick={goNext}
                       className="flex items-center gap-2 rounded-lg bg-[#1E3A8A] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
                     >
                       Weiter <ChevronRight className="h-4 w-4" />
@@ -313,6 +404,7 @@ export function ContactSection() {
                     label="Geschätzte Importvorgänge pro Jahr"
                     required
                     hint="Gemeint sind Zoll-/Importvorgänge, nicht einzelne Produkte oder Bestellungen."
+                    error={validationErrors.importvorgaenge ? "Pflichtfeld" : undefined}
                   >
                     <SelectInput
                       id="importvorgaenge"
@@ -333,6 +425,7 @@ export function ContactSection() {
                     label="Geschätztes jährliches Importvolumen"
                     required
                     hint="Eine grobe Schätzung reicht. Das hilft uns einzuschätzen, ob sich ein Leak-Scan wirtschaftlich lohnt."
+                    error={validationErrors.importvolumen ? "Pflichtfeld" : undefined}
                   >
                     <SelectInput
                       id="importvolumen"
@@ -350,11 +443,11 @@ export function ContactSection() {
                     />
                   </Field>
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <Field label="Hauptherkunftsländer" required>
+                    <Field label="Hauptherkunftsländer" required error={validationErrors.herkunftslaender ? "Pflichtfeld" : undefined}>
                       <TextInput id="herkunftslaender" placeholder="z. B. China, Türkei" value={formData.herkunftslaender} onChange={set("herkunftslaender")} required />
                       <p className="mt-1 text-xs text-slate-500">z. B. China, Türkei, Vietnam</p>
                     </Field>
-                    <Field label="Warengruppen" required>
+                    <Field label="Warengruppen" required error={validationErrors.warengruppen ? "Pflichtfeld" : undefined}>
                       <TextInput id="warengruppen" placeholder="z. B. Elektronikzubehör" value={formData.warengruppen} onChange={set("warengruppen")} required />
                       <p className="mt-1 text-xs text-slate-500">z. B. Elektronik, Ersatzteile</p>
                     </Field>
@@ -382,14 +475,14 @@ export function ContactSection() {
                   <div className="flex justify-between pt-2">
                     <button
                       type="button"
-                      onClick={() => setStep(1)}
+                      onClick={goBack}
                       className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100"
                     >
                       <ChevronLeft className="h-4 w-4" /> Zurück
                     </button>
                     <button
                       type="button"
-                      onClick={() => { if (formData.importvorgaenge && formData.importvolumen && formData.herkunftslaender && formData.warengruppen) setStep(3) }}
+                      onClick={goNext}
                       className="flex items-center gap-2 rounded-lg bg-[#1E3A8A] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
                     >
                       Weiter <ChevronRight className="h-4 w-4" />
@@ -406,16 +499,18 @@ export function ContactSection() {
                     Laden Sie 3–10 Beispieldokumente hoch: Zollbescheide, Handelsrechnungen, Packlisten oder Spediteursabrechnungen. <strong style={{ color: "#334155" }}>Bitte keine vollständigen Jahresarchive.</strong>
                   </p>
 
-                  {/* Drag & drop zone */}
+                  {/* Drag & drop zone — no input inside to avoid click event conflicts */}
                   <div
                     onDragEnter={handleDragEnter}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={openFilePicker}
                     className={`flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed px-6 py-10 text-center transition-colors ${
                       dragActive
                         ? "border-[#1E3A8A] bg-blue-50"
+                        : files.length > 0
+                        ? "border-[#16a34a] bg-green-50"
                         : "border-slate-300 bg-slate-50 hover:border-slate-400 hover:bg-white"
                     }`}
                   >
@@ -429,9 +524,9 @@ export function ContactSection() {
                       </p>
                       <p className="mt-1 text-xs text-slate-500">PDF, ZIP, CSV, XLSX – mehrere Dateien möglich</p>
                     </div>
-                    <input ref={fileInputRef} type="file" multiple className="hidden" onChange={(e) => { if (e.target.files?.length) { addFiles(e.target.files); e.target.value = "" } }} />
                   </div>
 
+                  {/* File list */}
                   {files.length > 0 && (
                     <div className="rounded-xl border p-4" style={{ backgroundColor: "#f0fdf4", borderColor: "#bbf7d0" }}>
                       <div className="mb-2 flex items-center gap-2">
@@ -442,11 +537,11 @@ export function ContactSection() {
                       </div>
                       <ul className="flex flex-col gap-1.5">
                         {files.map((file, i) => (
-                          <li key={i} className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm">
+                          <li key={`${file.name}-${file.size}-${i}`} className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm">
                             <FileText className="h-4 w-4 shrink-0" style={{ color: "#1E3A8A" }} />
                             <span className="flex-1 truncate text-slate-700">{file.name}</span>
                             <span className="shrink-0 text-xs text-slate-500">{formatFileSize(file.size)}</span>
-                            <button type="button" onClick={() => setFiles((p) => p.filter((_, j) => j !== i))} className="shrink-0 text-slate-400 transition-colors hover:text-red-500">
+                            <button type="button" onClick={() => removeFile(i)} className="shrink-0 text-slate-400 transition-colors hover:text-red-500">
                               <X className="h-3.5 w-3.5" />
                             </button>
                           </li>
@@ -476,15 +571,19 @@ export function ContactSection() {
                   <div className="flex justify-between pt-2">
                     <button
                       type="button"
-                      onClick={() => setStep(2)}
+                      onClick={goBack}
                       className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100"
                     >
                       <ChevronLeft className="h-4 w-4" /> Zurück
                     </button>
                     <button
                       type="submit"
-                      disabled={uploadStatus === "uploading" || files.length === 0}
-                      className="flex items-center gap-2 rounded-lg bg-[#1E3A8A] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+                      disabled={!canSubmit}
+                      className={`flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-semibold shadow-sm transition-all ${
+                        canSubmit
+                          ? "bg-[#1E3A8A] text-white hover:opacity-90"
+                          : "bg-slate-300 text-slate-500 cursor-not-allowed"
+                      }`}
                     >
                       {uploadStatus === "uploading" ? (
                         <><span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> Sicherer Upload-Kanal wird verschlüsselt aufgebaut...</>
