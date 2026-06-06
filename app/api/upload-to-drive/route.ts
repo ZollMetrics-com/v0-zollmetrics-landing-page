@@ -1,17 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@supabase/supabase-js"
 import nodemailer from "nodemailer"
 
 interface UploadedFile {
   name: string
   cdnUrl: string
-}
-
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
 }
 
 function getTransporter() {
@@ -137,37 +129,15 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const fileUrls = files.map((f: UploadedFile) => f.cdnUrl).filter(Boolean)
-
-    const supabase = getSupabase()
-    const { error: dbError } = await supabase.from("form_submissions").insert({
-      vorname, nachname, email, unternehmen, website, rolle,
-      importvorgaenge, importvolumen, herkunftslaender, warengruppen,
-      zolldienstleister, letzte_zollpruefung: letzteZollpruefung,
-      nachricht, file_urls: fileUrls, source: "landing",
+    const transporter = getTransporter()
+    const date = new Date().toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" })
+    await transporter.sendMail({
+      from: `"ZollMetrics Web-Formular" <${process.env.SMTP_USER}>`,
+      to: process.env.COMPANY_RECEIVER_EMAIL ?? "team@zollmetrics.com",
+      replyTo: email,
+      subject: `Neuer Erstcheck: ${unternehmen} - ${date}`,
+      html: buildEmailHtml({ vorname, nachname, email, unternehmen, website, rolle, importvorgaenge, importvolumen, herkunftslaender, warengruppen, zolldienstleister, letzteZollpruefung, nachricht, files }),
     })
-
-    if (dbError) {
-      console.error("Supabase insert error:", dbError)
-      return NextResponse.json({ error: "Speicherfehler. Bitte erneut versuchen." }, { status: 500 })
-    }
-
-    if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-      try {
-        const transporter = getTransporter()
-        const date = new Date().toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" })
-        await transporter.sendMail({
-          from: `"ZollMetrics Web-Formular" <${process.env.SMTP_USER}>`,
-          to: process.env.COMPANY_RECEIVER_EMAIL ?? "team@zollmetrics.com",
-          replyTo: email,
-          subject: `Neuer Erstcheck: ${unternehmen} - ${date}`,
-          html: buildEmailHtml({ vorname, nachname, email, unternehmen, website, rolle, importvorgaenge, importvolumen, herkunftslaender, warengruppen, zolldienstleister, letzteZollpruefung, nachricht, files }),
-        })
-      } catch (mailErr) {
-        console.error("Email send error:", mailErr)
-        // Submission already saved — email failure is non-fatal
-      }
-    }
 
     return NextResponse.json({ success: true })
   } catch (err) {
