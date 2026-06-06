@@ -11,11 +11,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Keine Dateien gefunden' }, { status: 400 });
     }
 
-    // Absolut sichere Google-Authentifizierung direkt über das credentials-Objekt
+    // Robust private key parsing: handles Vercel's \\n mangling and stray quotes
+    const rawKey = process.env.GOOGLE_PRIVATE_KEY || ''
+    const privateKey = rawKey
+      .replace(/\\n/g, '\n')
+      .replace(/^["']|["']$/g, '')
+
+    if (!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || !privateKey) {
+      return NextResponse.json(
+        { error: 'Google Drive ist nicht konfiguriert.' },
+        { status: 503 }
+      )
+    }
+
     const auth = new google.auth.GoogleAuth({
       credentials: {
         client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-        private_key: (process.env.GOOGLE_PRIVATE_KEY || '').replace(/\\n/g, '\n').replace(/^["']|["']$/g, ''),
+        private_key: privateKey,
       },
       scopes: ['https://www.googleapis.com/auth/drive.file', 'https://www.googleapis.com/auth/drive'],
     });

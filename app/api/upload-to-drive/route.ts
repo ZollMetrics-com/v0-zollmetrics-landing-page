@@ -2,11 +2,19 @@ import { NextRequest, NextResponse } from "next/server"
 import { google } from "googleapis"
 
 function getDriveClient() {
-  // Absolut native Übergabe – GoogleAuth bereinigt Keys intern fehlerfrei
+  const rawKey = process.env.GOOGLE_PRIVATE_KEY || ''
+  const privateKey = rawKey
+    .replace(/\\n/g, '\n')
+    .replace(/^["']|["']$/g, '')
+
+  if (!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || !privateKey) {
+    throw new Error('Google Drive credentials are not configured.')
+  }
+
   const auth = new google.auth.GoogleAuth({
     credentials: {
       client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-      private_key: process.env.GOOGLE_PRIVATE_KEY,
+      private_key: privateKey,
     },
     scopes: ['https://www.googleapis.com/auth/drive.file', 'https://www.googleapis.com/auth/drive'],
   })
