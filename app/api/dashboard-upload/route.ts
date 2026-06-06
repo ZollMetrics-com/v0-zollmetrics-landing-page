@@ -5,13 +5,11 @@ function getDriveClient() {
   const auth = new google.auth.GoogleAuth({
     credentials: {
       client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-      private_key: (process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY || process.env.GOOGLE_PRIVATE_KEY || '').replace(/\\n/g, '\n').replace(/^["']|["']$/g, ''),
+      private_key: (process.env.GOOGLE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
     },
-    scopes: ['https://www.googleapis.com/auth/drive.file', 'https://www.googleapis.com/auth/drive'],
+    scopes: ['https://www.googleapis.com/auth/drive'],
   })
-
-  const drive = google.drive({ version: 'v3', auth })
-  return drive
+  return google.drive({ version: 'v3', auth })
 }
 
 async function findCompanyFolder(
