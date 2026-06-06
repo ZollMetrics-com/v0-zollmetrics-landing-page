@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Check, CircleAlert as AlertCircle, ChevronRight, ChevronLeft } from "lucide-react"
-import { Widget } from "@uploadcare/react-widget"
+import { useState, useRef } from "react"
+import { Check, CircleAlert as AlertCircle, ChevronRight, ChevronLeft, X, Paperclip } from "lucide-react"
+import { uploadFile } from "@uploadcare/upload-client"
 
 type UploadStatus = "idle" | "uploading" | "success" | "error"
 
@@ -33,6 +33,12 @@ const steps = [
   { number: 2, label: "Importdaten" },
   { number: 3, label: "Dokumente" },
 ]
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
 
 function StepIndicator({ current }: { current: number }) {
   return (
@@ -133,15 +139,11 @@ function SelectInput({
 export function ContactSection() {
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState<FormData>(EMPTY)
-  const [fileUrls, setFileUrls] = useState<string[]>([])
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>("idle")
   const [errorMessage, setErrorMessage] = useState("")
   const [validationErrors, setValidationErrors] = useState<Record<string, boolean>>({})
-  const [widgetMounted, setWidgetMounted] = useState(false)
-
-  useEffect(() => {
-    setWidgetMounted(true)
-  }, [])
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const set = (key: keyof FormData) => (v: string) => {
     setFormData((p) => ({ ...p, [key]: v }))
@@ -182,27 +184,57 @@ export function ContactSection() {
     else if (step === 3) setStep(2)
   }
 
-  const canSubmit = fileUrls.length > 0 && !!formData.unternehmen && uploadStatus !== "uploading"
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newFiles = Array.from(e.target.files ?? [])
+    if (newFiles.length === 0) return
+    setSelectedFiles((prev) => {
+      const existingNames = new Set(prev.map((f) => f.name))
+      return [...prev, ...newFiles.filter((f) => !existingNames.has(f.name))]
+    })
+    e.target.value = ""
+    if (uploadStatus === "error") {
+      setUploadStatus("idle")
+      setErrorMessage("")
+    }
+  }
+
+  const removeFile = (name: string) => {
+    setSelectedFiles((prev) => prev.filter((f) => f.name !== name))
+  }
+
+  const canSubmit = selectedFiles.length > 0 && !!formData.unternehmen && uploadStatus !== "uploading"
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (fileUrls.length === 0) {
+    if (selectedFiles.length === 0) {
       setErrorMessage("Bitte laden Sie mindestens ein Dokument hoch.")
       setUploadStatus("error")
       return
     }
     setUploadStatus("uploading")
     setErrorMessage("")
+
     try {
+      const publicKey = process.env.NEXT_PUBLIC_UPLOADCARE_PUBLIC_KEY ?? "demopublickey"
+
+      const uploaded = await Promise.all(
+        selectedFiles.map(async (file) => {
+          const result = await uploadFile(file, { publicKey, store: "auto" })
+          return { name: file.name, cdnUrl: result.cdnUrl }
+        })
+      )
+
       const res = await fetch("/api/upload-to-drive", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, fileUrls }),
+        body: JSON.stringify({ ...formData, files: uploaded }),
       })
+
       if (!res.ok) {
         const json = await res.json().catch(() => ({}))
         throw new Error(json.error || "Fehler beim Speichern. Bitte erneut versuchen.")
       }
+
       setUploadStatus("success")
     } catch (err: unknown) {
       setErrorMessage(err instanceof Error ? err.message : "Unbekannter Fehler.")
@@ -238,7 +270,7 @@ export function ContactSection() {
                 setUploadStatus("idle")
                 setStep(1)
                 setFormData(EMPTY)
-                setFileUrls([])
+                setSelectedFiles([])
                 setValidationErrors({})
               }}
               className="rounded-lg border border-slate-200 bg-slate-50 px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100"
@@ -403,39 +435,53 @@ export function ContactSection() {
                     <strong style={{ color: "#334155" }}>Bitte keine vollständigen Jahresarchive.</strong>
                   </p>
 
-                  {widgetMounted && (
-                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                      <p className="mb-3 text-xs font-medium text-slate-500">PDF, ZIP, CSV, XLSX – mehrere Dateien möglich</p>
-                      <Widget
-                        publicKey={process.env.NEXT_PUBLIC_UPLOADCARE_PUBLIC_KEY ?? "demopublickey"}
-                        id="uc-files"
-                        name="files"
-                        multiple
-                        locale="de"
-                        onChange={(group) => {
-                          if (!group) {
-                            setFileUrls([])
-                            return
-                          }
-                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                          const grp = group as any
-                          if (typeof grp.files === "function") {
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            const urls: string[] = grp.files().map((f: any) => f.cdnUrl).filter(Boolean)
-                            setFileUrls(urls)
-                          } else if (grp.cdnUrl) {
-                            setFileUrls([grp.cdnUrl])
-                          }
-                        }}
-                      />
-                      {fileUrls.length > 0 && (
-                        <p className="mt-3 flex items-center gap-1.5 text-sm font-medium" style={{ color: "#16a34a" }}>
-                          <Check className="h-4 w-4" />
-                          {fileUrls.length} {fileUrls.length === 1 ? "Datei" : "Dateien"} hochgeladen
-                        </p>
-                      )}
-                    </div>
-                  )}
+                  {/* Hidden file input */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    accept=".pdf,.zip,.csv,.xlsx,.xls,.xml,.txt"
+                    className="hidden"
+                    onChange={handleFileChange}
+                  />
+
+                  {/* File picker area */}
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="mb-3 text-xs font-medium text-slate-500">PDF, ZIP, CSV, XLSX – mehrere Dateien möglich</p>
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:border-[#1E3A8A] hover:text-[#1E3A8A]"
+                    >
+                      <Paperclip className="h-4 w-4" />
+                      Dateien auswählen
+                    </button>
+
+                    {selectedFiles.length > 0 && (
+                      <ul className="mt-4 space-y-2">
+                        {selectedFiles.map((file) => (
+                          <li
+                            key={file.name}
+                            className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
+                          >
+                            <div className="flex min-w-0 items-center gap-2">
+                              <Paperclip className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                              <span className="truncate font-medium text-slate-700">{file.name}</span>
+                              <span className="shrink-0 text-xs text-slate-400">{formatBytes(file.size)}</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeFile(file.name)}
+                              className="ml-2 shrink-0 rounded p-0.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                              aria-label={`${file.name} entfernen`}
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
 
                   <div className="flex flex-col gap-1.5">
                     <label className="text-sm font-medium text-slate-700">Anmerkungen (optional)</label>
@@ -475,7 +521,7 @@ export function ContactSection() {
                       {uploadStatus === "uploading" ? (
                         <>
                           <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                          Wird gespeichert...
+                          Wird hochgeladen...
                         </>
                       ) : (
                         "Erstcheck starten"

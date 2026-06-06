@@ -1,29 +1,49 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useRef } from "react"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Check, CircleAlert as AlertCircle, Lock } from "lucide-react"
-import { Widget } from "@uploadcare/react-widget"
+import { Check, CircleAlert as AlertCircle, Lock, Paperclip, X } from "lucide-react"
+import { uploadFile } from "@uploadcare/upload-client"
 
 type UploadStatus = "idle" | "uploading" | "success" | "error"
 
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
 export default function CustomerPortal() {
   const [companyName, setCompanyName] = useState("")
-  const [fileUrls, setFileUrls] = useState<string[]>([])
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>("idle")
   const [errorMessage, setErrorMessage] = useState("")
-  const [widgetMounted, setWidgetMounted] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
-    setWidgetMounted(true)
-  }, [])
+  const canSubmit = companyName.trim().length > 0 && selectedFiles.length > 0 && uploadStatus !== "uploading"
 
-  const canSubmit = companyName.trim().length > 0 && fileUrls.length > 0 && uploadStatus !== "uploading"
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newFiles = Array.from(e.target.files ?? [])
+    if (newFiles.length === 0) return
+    setSelectedFiles((prev) => {
+      const existingNames = new Set(prev.map((f) => f.name))
+      return [...prev, ...newFiles.filter((f) => !existingNames.has(f.name))]
+    })
+    e.target.value = ""
+    if (uploadStatus === "error") {
+      setUploadStatus("idle")
+      setErrorMessage("")
+    }
+  }
+
+  const removeFile = (name: string) => {
+    setSelectedFiles((prev) => prev.filter((f) => f.name !== name))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -32,7 +52,7 @@ export default function CustomerPortal() {
       setUploadStatus("error")
       return
     }
-    if (fileUrls.length === 0) {
+    if (selectedFiles.length === 0) {
       setErrorMessage("Mindestens eine Datei ist erforderlich.")
       setUploadStatus("error")
       return
@@ -40,6 +60,14 @@ export default function CustomerPortal() {
     setUploadStatus("uploading")
     setErrorMessage("")
     try {
+      const publicKey = process.env.NEXT_PUBLIC_UPLOADCARE_PUBLIC_KEY ?? "demopublickey"
+      const fileUrls = await Promise.all(
+        selectedFiles.map(async (file) => {
+          const result = await uploadFile(file, { publicKey, store: "auto" })
+          return result.cdnUrl
+        })
+      )
+
       const res = await fetch("/api/dashboard-upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -79,7 +107,7 @@ export default function CustomerPortal() {
                 onClick={() => {
                   setUploadStatus("idle")
                   setCompanyName("")
-                  setFileUrls([])
+                  setSelectedFiles([])
                   setErrorMessage("")
                 }}
                 className="bg-[#0B1F3A] text-white hover:bg-[#162d54]"
@@ -140,54 +168,63 @@ export default function CustomerPortal() {
                   </p>
                 </div>
 
-                {/* Uploadcare Widget */}
+                {/* File picker */}
                 <div className="flex flex-col gap-2">
                   <Label className="font-semibold text-slate-700">
                     Dateien hochladen <span className="text-red-500">*</span>
                     <span className="ml-1 font-normal text-slate-500">(ZIP, PDF, CSV, Excel, etc.)</span>
                   </Label>
-                  {widgetMounted && (
-                    <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                      <Widget
-                        publicKey={process.env.NEXT_PUBLIC_UPLOADCARE_PUBLIC_KEY ?? "demopublickey"}
-                        id="uc-datenraum"
-                        name="files"
-                        multiple
-                        locale="de"
-                        onChange={(group) => {
-                          if (!group) {
-                            setFileUrls([])
-                            return
-                          }
-                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                          const grp = group as any
-                          if (typeof grp.files === "function") {
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            const urls: string[] = grp.files().map((f: any) => f.cdnUrl).filter(Boolean)
-                            setFileUrls(urls)
-                          } else if (grp.cdnUrl) {
-                            setFileUrls([grp.cdnUrl])
-                          }
-                          if (uploadStatus === "error") {
-                            setUploadStatus("idle")
-                            setErrorMessage("")
-                          }
-                        }}
-                      />
-                      {fileUrls.length > 0 && (
-                        <p className="mt-3 flex items-center gap-1.5 text-sm font-medium text-emerald-700">
-                          <Check className="h-4 w-4" />
-                          {fileUrls.length} {fileUrls.length === 1 ? "Datei" : "Dateien"} hochgeladen
-                        </p>
-                      )}
-                    </div>
-                  )}
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    accept=".pdf,.zip,.csv,.xlsx,.xls,.xml,.txt"
+                    className="hidden"
+                    onChange={handleFileChange}
+                  />
+
+                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:border-[#0B1F3A] hover:text-[#0B1F3A]"
+                    >
+                      <Paperclip className="h-4 w-4" />
+                      Dateien auswählen
+                    </button>
+
+                    {selectedFiles.length > 0 && (
+                      <ul className="mt-4 space-y-2">
+                        {selectedFiles.map((file) => (
+                          <li
+                            key={file.name}
+                            className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
+                          >
+                            <div className="flex min-w-0 items-center gap-2">
+                              <Paperclip className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                              <span className="truncate font-medium text-slate-700">{file.name}</span>
+                              <span className="shrink-0 text-xs text-slate-400">{formatBytes(file.size)}</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeFile(file.name)}
+                              className="ml-2 shrink-0 rounded p-0.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                              aria-label={`${file.name} entfernen`}
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                 </div>
 
                 {/* Validation hint */}
                 {!canSubmit && uploadStatus !== "uploading" && (
                   <p className="text-sm text-slate-500">
-                    {!companyName.trim() && fileUrls.length === 0
+                    {!companyName.trim() && selectedFiles.length === 0
                       ? "Bitte geben Sie den Firmennamen ein und laden Sie mindestens eine Datei hoch."
                       : !companyName.trim()
                       ? "Bitte geben Sie den Firmennamen ein."
@@ -211,7 +248,7 @@ export default function CustomerPortal() {
                   {uploadStatus === "uploading" ? (
                     <>
                       <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                      Wird gespeichert...
+                      Wird hochgeladen...
                     </>
                   ) : (
                     "Neue Dokumente einreichen"
