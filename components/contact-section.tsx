@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useRef, useCallback } from "react"
-import { Check, Upload, X, FileText, CircleAlert as AlertCircle, ChevronRight, ChevronLeft } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Check, CircleAlert as AlertCircle, ChevronRight, ChevronLeft } from "lucide-react"
+import { Widget } from "@uploadcare/react-widget"
 
 type UploadStatus = "idle" | "uploading" | "success" | "error"
 
@@ -129,109 +130,42 @@ function SelectInput({
   )
 }
 
-function formatFileSize(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-}
-
 export function ContactSection() {
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState<FormData>(EMPTY)
-  const [files, setFiles] = useState<File[]>([])
-  const [dragActive, setDragActive] = useState(false)
+  const [fileUrls, setFileUrls] = useState<string[]>([])
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>("idle")
   const [errorMessage, setErrorMessage] = useState("")
   const [validationErrors, setValidationErrors] = useState<Record<string, boolean>>({})
+  const [widgetMounted, setWidgetMounted] = useState(false)
 
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const dragCounter = useRef(0)
+  useEffect(() => {
+    setWidgetMounted(true)
+  }, [])
 
   const set = (key: keyof FormData) => (v: string) => {
     setFormData((p) => ({ ...p, [key]: v }))
     if (v) setValidationErrors((p) => ({ ...p, [key]: false }))
   }
 
-  // ── File handlers ──
-
-  const addFiles = useCallback((newFiles: File[]) => {
-    setFiles((prev) => {
-      const existing = new Set(prev.map((f) => f.name + f.size))
-      return [...prev, ...newFiles.filter((f) => !existing.has(f.name + f.size))]
-    })
-    setUploadStatus("idle")
-    setErrorMessage("")
-  }, [])
-
-  const handleFileInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const fileList = e.target.files
-    if (fileList && fileList.length > 0) {
-      const filesArray = Array.from(fileList)
-      addFiles(filesArray)
-    }
-    e.target.value = ""
-  }, [addFiles])
-
-  const handleDragEnter = (e: React.DragEvent) => {
-    e.preventDefault(); e.stopPropagation()
-    dragCounter.current++
-    setDragActive(true)
-  }
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault(); e.stopPropagation()
-    dragCounter.current--
-    if (dragCounter.current === 0) setDragActive(false)
-  }
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault(); e.stopPropagation()
-  }
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault(); e.stopPropagation()
-    dragCounter.current = 0
-    setDragActive(false)
-    if (e.dataTransfer.files?.length) {
-      addFiles(Array.from(e.dataTransfer.files))
-    }
-  }
-
-  const removeFile = (index: number) => {
-    setFiles((prev) => prev.filter((_, j) => j !== index))
-  }
-
-  const openFilePicker = () => {
-    fileInputRef.current?.click()
-  }
-
-  // ── Step navigation with validation ──
-
   const step1Fields = ["vorname", "nachname", "email", "unternehmen"] as const
+  const step2Fields = ["importvorgaenge", "importvolumen", "herkunftslaender", "warengruppen"] as const
 
   const validateStep1 = () => {
     const errors: Record<string, boolean> = {}
     let valid = true
     for (const key of step1Fields) {
-      if (!formData[key]) {
-        errors[key] = true
-        valid = false
-      }
+      if (!formData[key]) { errors[key] = true; valid = false }
     }
     setValidationErrors((p) => ({ ...p, ...errors }))
     return valid
   }
 
-  const step2Fields = ["importvorgaenge", "importvolumen", "herkunftslaender", "warengruppen"] as const
-
   const validateStep2 = () => {
     const errors: Record<string, boolean> = {}
     let valid = true
     for (const key of step2Fields) {
-      if (!formData[key]) {
-        errors[key] = true
-        valid = false
-      }
+      if (!formData[key]) { errors[key] = true; valid = false }
     }
     setValidationErrors((p) => ({ ...p, ...errors }))
     return valid
@@ -248,45 +182,33 @@ export function ContactSection() {
     else if (step === 3) setStep(2)
   }
 
-  // ── Submit ──
-
-  const canSubmit = files.length > 0 && !!formData.unternehmen && uploadStatus !== "uploading"
+  const canSubmit = fileUrls.length > 0 && !!formData.unternehmen && uploadStatus !== "uploading"
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (files.length === 0) {
+    if (fileUrls.length === 0) {
       setErrorMessage("Bitte laden Sie mindestens ein Dokument hoch.")
-      setUploadStatus("error")
-      return
-    }
-    if (!formData.unternehmen) {
-      setErrorMessage("Unternehmensname fehlt. Bitte gehen Sie zurück zu Schritt 1.")
       setUploadStatus("error")
       return
     }
     setUploadStatus("uploading")
     setErrorMessage("")
     try {
-      const data = new FormData()
-      Object.entries(formData).forEach(([k, v]) => data.append(k, v))
-      files.forEach((f) => data.append("files", f))
-      const res = await fetch("/api/upload-to-drive", { method: "POST", body: data })
+      const res = await fetch("/api/upload-to-drive", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...formData, fileUrls }),
+      })
       if (!res.ok) {
         const json = await res.json().catch(() => ({}))
-        // Use our professional error message if the server returns one, otherwise use generic
-        throw new Error(json.error || "Fehler bei der Datenübertragung: Der gesicherte Validierungs-Server konnte keine stabile Verbindung aufbauen. Bitte versuchen Sie es in wenigen Minuten erneut oder kontaktieren Sie Ihren Betreuer.")
+        throw new Error(json.error || "Fehler beim Speichern. Bitte erneut versuchen.")
       }
       setUploadStatus("success")
     } catch (err: unknown) {
-      const message = err instanceof Error 
-        ? err.message 
-        : "Fehler bei der Datenübertragung: Der gesicherte Validierungs-Server konnte keine stabile Verbindung aufbauen. Bitte versuchen Sie es in wenigen Minuten erneut oder kontaktieren Sie Ihren Betreuer."
-      setErrorMessage(message)
+      setErrorMessage(err instanceof Error ? err.message : "Unbekannter Fehler.")
       setUploadStatus("error")
     }
   }
-
-  // ── Success view ──
 
   if (uploadStatus === "success") {
     return (
@@ -304,7 +226,7 @@ export function ContactSection() {
                 Übertragung erfolgreich
               </h3>
               <p className="mt-3" style={{ color: "#475569" }}>
-                Ihr geschützter Datenraum <strong style={{ color: "#0B192C" }}>{formData.unternehmen}</strong> wurde aktualisiert.
+                Ihr Datenpaket für <strong style={{ color: "#0B192C" }}>{formData.unternehmen}</strong> wurde gespeichert.
                 Unsere Experten wurden benachrichtigt.
               </p>
               <p className="mt-3 text-sm" style={{ color: "#64748b" }}>
@@ -312,7 +234,13 @@ export function ContactSection() {
               </p>
             </div>
             <button
-              onClick={() => { setUploadStatus("idle"); setStep(1); setFormData(EMPTY); setFiles([]); setValidationErrors({}) }}
+              onClick={() => {
+                setUploadStatus("idle")
+                setStep(1)
+                setFormData(EMPTY)
+                setFileUrls([])
+                setValidationErrors({})
+              }}
               className="rounded-lg border border-slate-200 bg-slate-50 px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100"
             >
               Weitere Anfrage senden
@@ -322,8 +250,6 @@ export function ContactSection() {
       </section>
     )
   }
-
-  // ── Main form ──
 
   return (
     <section id="scan" className="border-t py-16 md:py-24" style={{ backgroundColor: "#F8F9FA", borderTopColor: "#e2e8f0" }}>
@@ -349,15 +275,6 @@ export function ContactSection() {
             className="rounded-2xl border p-8 shadow-sm"
             style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }}
           >
-            {/* Hidden file input lives OUTSIDE the clickable drop zone */}
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              className="hidden"
-              onChange={handleFileInputChange}
-            />
-
             <form onSubmit={handleSubmit} noValidate>
 
               {/* ── STEP 1: Kontakt ── */}
@@ -416,13 +333,7 @@ export function ContactSection() {
                       onChange={set("importvorgaenge")}
                       placeholder="Bitte wählen"
                       required
-                      options={[
-                        "Unter 50 Vorgänge",
-                        "50 – 200 Vorgänge",
-                        "200 – 500 Vorgänge",
-                        "500 – 1.000 Vorgänge",
-                        "Über 1.000 Vorgänge",
-                      ]}
+                      options={["Unter 50 Vorgänge", "50 – 200 Vorgänge", "200 – 500 Vorgänge", "500 – 1.000 Vorgänge", "Über 1.000 Vorgänge"]}
                     />
                   </Field>
                   <Field
@@ -437,13 +348,7 @@ export function ContactSection() {
                       onChange={set("importvolumen")}
                       placeholder="Bitte wählen"
                       required
-                      options={[
-                        "Unter 100.000 €",
-                        "100.000 – 500.000 €",
-                        "500.000 € – 1 Mio. €",
-                        "1 – 5 Mio. €",
-                        "Über 5 Mio. €",
-                      ]}
+                      options={["Unter 100.000 €", "100.000 – 500.000 €", "500.000 € – 1 Mio. €", "1 – 5 Mio. €", "Über 5 Mio. €"]}
                     />
                   </Field>
                   <div className="grid gap-4 sm:grid-cols-2">
@@ -466,13 +371,7 @@ export function ContactSection() {
                         value={formData.letzteZollpruefung}
                         onChange={set("letzteZollpruefung")}
                         placeholder="Bitte wählen"
-                        options={[
-                          "Noch nie",
-                          "Vor mehr als 3 Jahren",
-                          "Vor 1–3 Jahren",
-                          "Innerhalb des letzten Jahres",
-                          "Weiß ich nicht",
-                        ]}
+                        options={["Noch nie", "Vor mehr als 3 Jahren", "Vor 1–3 Jahren", "Innerhalb des letzten Jahres", "Weiß ich nicht"]}
                       />
                     </Field>
                   </div>
@@ -500,57 +399,41 @@ export function ContactSection() {
                 <div className="flex flex-col gap-5">
                   <h3 className="text-lg font-semibold" style={{ color: "#0B192C" }}>Dokumente hochladen</h3>
                   <p className="text-sm" style={{ color: "#64748b" }}>
-                    Laden Sie 3–10 Beispieldokumente hoch: Zollbescheide, Handelsrechnungen, Packlisten oder Spediteursabrechnungen. <strong style={{ color: "#334155" }}>Bitte keine vollständigen Jahresarchive.</strong>
+                    Laden Sie 3–10 Beispieldokumente hoch: Zollbescheide, Handelsrechnungen, Packlisten oder Spediteursabrechnungen.{" "}
+                    <strong style={{ color: "#334155" }}>Bitte keine vollständigen Jahresarchive.</strong>
                   </p>
 
-                  {/* Drag & drop zone — no input inside to avoid click event conflicts */}
-                  <div
-                    onDragEnter={handleDragEnter}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                    onClick={openFilePicker}
-                    className={`flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed px-6 py-10 text-center transition-colors ${
-                      dragActive
-                        ? "border-[#1E3A8A] bg-blue-50"
-                        : files.length > 0
-                        ? "border-[#16a34a] bg-green-50"
-                        : "border-slate-300 bg-slate-50 hover:border-slate-400 hover:bg-white"
-                    }`}
-                  >
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#eef3fc]">
-                      <Upload className={`h-6 w-6 ${dragActive ? "text-[#1E3A8A]" : "text-slate-400"}`} />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-slate-700">
-                        Dateien hierher ziehen oder{" "}
-                        <span className="underline underline-offset-2" style={{ color: "#1E3A8A" }}>auswählen</span>
-                      </p>
-                      <p className="mt-1 text-xs text-slate-500">PDF, ZIP, CSV, XLSX – mehrere Dateien möglich</p>
-                    </div>
-                  </div>
-
-                  {/* File list */}
-                  {files.length > 0 && (
-                    <div className="rounded-xl border p-4" style={{ backgroundColor: "#f0fdf4", borderColor: "#bbf7d0" }}>
-                      <div className="mb-2 flex items-center gap-2">
-                        <Check className="h-4 w-4" style={{ color: "#16a34a" }} />
-                        <span className="text-sm font-medium" style={{ color: "#14532d" }}>
-                          {files.length} {files.length === 1 ? "Datei" : "Dateien"} ausgewählt
-                        </span>
-                      </div>
-                      <ul className="flex flex-col gap-1.5">
-                        {files.map((file, i) => (
-                          <li key={`${file.name}-${file.size}-${i}`} className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm">
-                            <FileText className="h-4 w-4 shrink-0" style={{ color: "#1E3A8A" }} />
-                            <span className="flex-1 truncate text-slate-700">{file.name}</span>
-                            <span className="shrink-0 text-xs text-slate-500">{formatFileSize(file.size)}</span>
-                            <button type="button" onClick={() => removeFile(i)} className="shrink-0 text-slate-400 transition-colors hover:text-red-500">
-                              <X className="h-3.5 w-3.5" />
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
+                  {widgetMounted && (
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                      <p className="mb-3 text-xs font-medium text-slate-500">PDF, ZIP, CSV, XLSX – mehrere Dateien möglich</p>
+                      <Widget
+                        publicKey={process.env.NEXT_PUBLIC_UPLOADCARE_PUBLIC_KEY ?? "demopublickey"}
+                        id="uc-files"
+                        name="files"
+                        multiple
+                        locale="de"
+                        onChange={(group) => {
+                          if (!group) {
+                            setFileUrls([])
+                            return
+                          }
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                          const grp = group as any
+                          if (typeof grp.files === "function") {
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            const urls: string[] = grp.files().map((f: any) => f.cdnUrl).filter(Boolean)
+                            setFileUrls(urls)
+                          } else if (grp.cdnUrl) {
+                            setFileUrls([grp.cdnUrl])
+                          }
+                        }}
+                      />
+                      {fileUrls.length > 0 && (
+                        <p className="mt-3 flex items-center gap-1.5 text-sm font-medium" style={{ color: "#16a34a" }}>
+                          <Check className="h-4 w-4" />
+                          {fileUrls.length} {fileUrls.length === 1 ? "Datei" : "Dateien"} hochgeladen
+                        </p>
+                      )}
                     </div>
                   )}
 
@@ -586,13 +469,16 @@ export function ContactSection() {
                       className={`flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-semibold shadow-sm transition-all ${
                         canSubmit
                           ? "bg-[#1E3A8A] text-white hover:opacity-90"
-                          : "bg-slate-300 text-slate-500 cursor-not-allowed"
+                          : "cursor-not-allowed bg-slate-300 text-slate-500"
                       }`}
                     >
                       {uploadStatus === "uploading" ? (
-                        <><span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> Verbindung zum gesicherten Server-Netzwerk wird verschlüsselt aufgebaut...</>
+                        <>
+                          <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                          Wird gespeichert...
+                        </>
                       ) : (
-                        <><Upload className="h-4 w-4" /> Erstcheck starten</>
+                        "Erstcheck starten"
                       )}
                     </button>
                   </div>
