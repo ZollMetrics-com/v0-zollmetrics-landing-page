@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useRef, useCallback } from "react"
+import { useState } from "react"
 import { Check, Upload, X, FileText, CircleAlert as AlertCircle, ChevronRight, ChevronLeft } from "lucide-react"
+import { UploadcareUploader, type UploadedFile } from "@/components/uploadcare-uploader"
 
 type UploadStatus = "idle" | "uploading" | "success" | "error"
 
@@ -138,14 +139,10 @@ function formatFileSize(bytes: number) {
 export function ContactSection() {
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState<FormData>(EMPTY)
-  const [files, setFiles] = useState<File[]>([])
-  const [dragActive, setDragActive] = useState(false)
+  const [files, setFiles] = useState<UploadedFile[]>([])
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>("idle")
   const [errorMessage, setErrorMessage] = useState("")
   const [validationErrors, setValidationErrors] = useState<Record<string, boolean>>({})
-
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const dragCounter = useRef(0)
 
   const set = (key: keyof FormData) => (v: string) => {
     setFormData((p) => ({ ...p, [key]: v }))
@@ -154,55 +151,14 @@ export function ContactSection() {
 
   // ── File handlers ──
 
-  const addFiles = useCallback((newFiles: File[]) => {
-    setFiles((prev) => {
-      const existing = new Set(prev.map((f) => f.name + f.size))
-      return [...prev, ...newFiles.filter((f) => !existing.has(f.name + f.size))]
-    })
-    setUploadStatus("idle")
+  const handleFilesChange = (uploaded: UploadedFile[]) => {
+    setFiles(uploaded)
+    setUploadStatus((prev) => (prev === "error" ? "idle" : prev))
     setErrorMessage("")
-  }, [])
-
-  const handleFileInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const fileList = e.target.files
-    if (fileList && fileList.length > 0) {
-      const filesArray = Array.from(fileList)
-      addFiles(filesArray)
-    }
-    e.target.value = ""
-  }, [addFiles])
-
-  const handleDragEnter = (e: React.DragEvent) => {
-    e.preventDefault(); e.stopPropagation()
-    dragCounter.current++
-    setDragActive(true)
-  }
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault(); e.stopPropagation()
-    dragCounter.current--
-    if (dragCounter.current === 0) setDragActive(false)
-  }
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault(); e.stopPropagation()
-  }
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault(); e.stopPropagation()
-    dragCounter.current = 0
-    setDragActive(false)
-    if (e.dataTransfer.files?.length) {
-      addFiles(Array.from(e.dataTransfer.files))
-    }
   }
 
   const removeFile = (index: number) => {
     setFiles((prev) => prev.filter((_, j) => j !== index))
-  }
-
-  const openFilePicker = () => {
-    fileInputRef.current?.click()
   }
 
   // ── Step navigation with validation ──
@@ -267,20 +223,23 @@ export function ContactSection() {
     setUploadStatus("uploading")
     setErrorMessage("")
     try {
-      const data = new FormData()
-      Object.entries(formData).forEach(([k, v]) => data.append(k, v))
-      files.forEach((f) => data.append("files", f))
-      const res = await fetch("/api/upload-to-drive", { method: "POST", body: data })
+      const res = await fetch("/api/upload-to-drive", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fields: formData,
+          fileUrls: files.map((f) => f.cdnUrl),
+        }),
+      })
       if (!res.ok) {
         const json = await res.json().catch(() => ({}))
-        // Use our professional error message if the server returns one, otherwise use generic
-        throw new Error(json.error || "Fehler bei der Datenübertragung: Der gesicherte Validierungs-Server konnte keine stabile Verbindung aufbauen. Bitte versuchen Sie es in wenigen Minuten erneut oder kontaktieren Sie Ihren Betreuer.")
+        throw new Error(json.error || "Beim Übermitteln ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.")
       }
       setUploadStatus("success")
     } catch (err: unknown) {
-      const message = err instanceof Error 
-        ? err.message 
-        : "Fehler bei der Datenübertragung: Der gesicherte Validierungs-Server konnte keine stabile Verbindung aufbauen. Bitte versuchen Sie es in wenigen Minuten erneut oder kontaktieren Sie Ihren Betreuer."
+      const message = err instanceof Error
+        ? err.message
+        : "Beim Übermitteln ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
       setErrorMessage(message)
       setUploadStatus("error")
     }
@@ -349,15 +308,6 @@ export function ContactSection() {
             className="rounded-2xl border p-8 shadow-sm"
             style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }}
           >
-            {/* Hidden file input lives OUTSIDE the clickable drop zone */}
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              className="hidden"
-              onChange={handleFileInputChange}
-            />
-
             <form onSubmit={handleSubmit} noValidate>
 
               {/* ── STEP 1: Kontakt ── */}
@@ -503,32 +453,8 @@ export function ContactSection() {
                     Laden Sie 3–10 Beispieldokumente hoch: Zollbescheide, Handelsrechnungen, Packlisten oder Spediteursabrechnungen. <strong style={{ color: "#334155" }}>Bitte keine vollständigen Jahresarchive.</strong>
                   </p>
 
-                  {/* Drag & drop zone — no input inside to avoid click event conflicts */}
-                  <div
-                    onDragEnter={handleDragEnter}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                    onClick={openFilePicker}
-                    className={`flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed px-6 py-10 text-center transition-colors ${
-                      dragActive
-                        ? "border-[#1E3A8A] bg-blue-50"
-                        : files.length > 0
-                        ? "border-[#16a34a] bg-green-50"
-                        : "border-slate-300 bg-slate-50 hover:border-slate-400 hover:bg-white"
-                    }`}
-                  >
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#eef3fc]">
-                      <Upload className={`h-6 w-6 ${dragActive ? "text-[#1E3A8A]" : "text-slate-400"}`} />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-slate-700">
-                        Dateien hierher ziehen oder{" "}
-                        <span className="underline underline-offset-2" style={{ color: "#1E3A8A" }}>auswählen</span>
-                      </p>
-                      <p className="mt-1 text-xs text-slate-500">PDF, ZIP, CSV, XLSX – mehrere Dateien möglich</p>
-                    </div>
-                  </div>
+                  {/* Uploadcare uploader */}
+                  <UploadcareUploader onFilesChange={handleFilesChange} />
 
                   {/* File list */}
                   {files.length > 0 && (
@@ -536,12 +462,12 @@ export function ContactSection() {
                       <div className="mb-2 flex items-center gap-2">
                         <Check className="h-4 w-4" style={{ color: "#16a34a" }} />
                         <span className="text-sm font-medium" style={{ color: "#14532d" }}>
-                          {files.length} {files.length === 1 ? "Datei" : "Dateien"} ausgewählt
+                          {files.length} {files.length === 1 ? "Datei" : "Dateien"} hochgeladen
                         </span>
                       </div>
                       <ul className="flex flex-col gap-1.5">
                         {files.map((file, i) => (
-                          <li key={`${file.name}-${file.size}-${i}`} className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm">
+                          <li key={file.uuid || `${file.name}-${i}`} className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm">
                             <FileText className="h-4 w-4 shrink-0" style={{ color: "#1E3A8A" }} />
                             <span className="flex-1 truncate text-slate-700">{file.name}</span>
                             <span className="shrink-0 text-xs text-slate-500">{formatFileSize(file.size)}</span>

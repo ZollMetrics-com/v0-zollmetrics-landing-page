@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useCallback, useMemo } from "react"
+import { useState, useCallback, useMemo } from "react"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
@@ -8,16 +8,15 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Upload, X, FileText, Check, CircleAlert as AlertCircle, Lock } from "lucide-react"
+import { UploadcareUploader, type UploadedFile } from "@/components/uploadcare-uploader"
 
 type UploadStatus = "idle" | "uploading" | "success" | "error"
 
 export default function CustomerPortal() {
   const [companyName, setCompanyName] = useState("")
-  const [files, setFiles] = useState<File[]>([])
-  const [dragActive, setDragActive] = useState(false)
+  const [files, setFiles] = useState<UploadedFile[]>([])
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>("idle")
   const [errorMessage, setErrorMessage] = useState("")
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Strict validation: both company name and files are required
   const canSubmit = useMemo(() => {
@@ -26,36 +25,11 @@ export default function CustomerPortal() {
     return hasCompanyName && hasFiles && uploadStatus !== "uploading"
   }, [companyName, files, uploadStatus])
 
-  const addFiles = useCallback((newFiles: FileList | File[]) => {
-    setFiles((prev) => {
-      const existing = new Set(prev.map((f) => f.name + f.size))
-      const filtered = Array.from(newFiles).filter(
-        (f) => !existing.has(f.name + f.size)
-      )
-      return [...prev, ...filtered]
-    })
-    setUploadStatus("idle")
+  const handleFilesChange = useCallback((uploaded: UploadedFile[]) => {
+    setFiles(uploaded)
+    setUploadStatus((prev) => (prev === "error" ? "idle" : prev))
     setErrorMessage("")
   }, [])
-
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (e.type === "dragenter" || e.type === "dragover") setDragActive(true)
-    else if (e.type === "dragleave") setDragActive(false)
-  }
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setDragActive(false)
-    if (e.dataTransfer.files?.length) addFiles(e.dataTransfer.files)
-  }
-
-  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.length) addFiles(e.target.files)
-    e.target.value = ""
-  }
 
   const removeFile = (index: number) => {
     setFiles((prev) => prev.filter((_, i) => i !== index))
@@ -69,14 +43,14 @@ export default function CustomerPortal() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     // Double-check validation before submit
     if (!companyName.trim()) {
       setErrorMessage("Firmenname ist erforderlich.")
       setUploadStatus("error")
       return
     }
-    
+
     if (files.length === 0) {
       setErrorMessage("Mindestens eine Datei ist erforderlich.")
       setUploadStatus("error")
@@ -87,26 +61,26 @@ export default function CustomerPortal() {
     setErrorMessage("")
 
     try {
-      const data = new FormData()
-      data.append("companyName", companyName.trim())
-      files.forEach((file) => data.append("files", file))
-
       const res = await fetch("/api/dashboard-upload", {
         method: "POST",
-        body: data,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          companyName: companyName.trim(),
+          fileUrls: files.map((f) => f.cdnUrl),
+        }),
       })
 
       if (!res.ok) {
         const json = await res.json().catch(() => ({}))
-        // Use our professional error message if the server returns one, otherwise use generic
-        throw new Error(json.error || "Fehler bei der Datenübertragung: Der gesicherte Validierungs-Server konnte keine stabile Verbindung aufbauen. Bitte versuchen Sie es in wenigen Minuten erneut oder kontaktieren Sie Ihren Betreuer.")
+        throw new Error(json.error || "Beim Übermitteln ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.")
       }
 
       setUploadStatus("success")
     } catch (err: unknown) {
-      const message = err instanceof Error 
-        ? err.message 
-        : "Fehler bei der Datenübertragung: Der gesicherte Validierungs-Server konnte keine stabile Verbindung aufbauen. Bitte versuchen Sie es in wenigen Minuten erneut oder kontaktieren Sie Ihren Betreuer."
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Beim Übermitteln ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
       setErrorMessage(message)
       setUploadStatus("error")
     }
@@ -196,61 +170,27 @@ export default function CustomerPortal() {
                   </p>
                 </div>
 
-                {/* Drag & Drop Upload - REQUIRED */}
+                {/* File Upload via Uploadcare - REQUIRED */}
                 <div className="flex flex-col gap-2">
                   <Label className="text-slate-700 font-semibold">
                     Dateien hochladen <span className="text-red-500">*</span>
                     <span className="font-normal text-slate-500 ml-1">(ZIP, PDF, CSV, Excel, Bilder, etc.)</span>
                   </Label>
-                  <div
-                    onDragEnter={handleDrag}
-                    onDragOver={handleDrag}
-                    onDragLeave={handleDrag}
-                    onDrop={handleDrop}
-                    onClick={() => fileInputRef.current?.click()}
-                    className={`
-                      flex cursor-pointer flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed px-4 py-10 text-center transition-colors
-                      ${dragActive
-                        ? "border-[#0B1F3A] bg-[#0B1F3A]/5"
-                        : files.length > 0
-                        ? "border-emerald-400 bg-emerald-50"
-                        : uploadStatus === "error" && files.length === 0
-                        ? "border-red-400 bg-red-50"
-                        : "border-slate-300 bg-slate-50 hover:border-slate-400 hover:bg-slate-100"
-                      }
-                    `}
-                  >
-                    <Upload className={`h-8 w-8 ${dragActive ? "text-[#0B1F3A]" : files.length > 0 ? "text-emerald-600" : "text-slate-400"}`} />
-                    <div>
-                      <p className="text-sm font-medium text-slate-700">
-                        Dateien hier ablegen oder{" "}
-                        <span className="text-[#0B1F3A] underline underline-offset-2">auswählen</span>
-                      </p>
-                      <p className="mt-1 text-xs text-slate-500">
-                        Mehrere Dateien, auch große ZIP-Archive und Datenbank-Exporte möglich
-                      </p>
-                    </div>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      multiple
-                      className="hidden"
-                      onChange={handleFileInput}
-                    />
-                  </div>
+
+                  <UploadcareUploader onFilesChange={handleFilesChange} />
 
                   {files.length > 0 && (
                     <div className="mt-2 rounded-lg border border-emerald-200 bg-emerald-50 p-3">
                       <div className="mb-2 flex items-center gap-2">
                         <Check className="h-4 w-4 text-emerald-600" />
                         <span className="text-sm font-medium text-emerald-800">
-                          {files.length} {files.length === 1 ? "Datei" : "Dateien"} ausgewählt
+                          {files.length} {files.length === 1 ? "Datei" : "Dateien"} hochgeladen
                         </span>
                       </div>
                       <ul className="flex flex-col gap-1.5">
                         {files.map((file, index) => (
                           <li
-                            key={index}
+                            key={file.uuid || index}
                             className="flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm"
                           >
                             <FileText className="h-4 w-4 shrink-0 text-slate-400" />
@@ -260,7 +200,7 @@ export default function CustomerPortal() {
                             </span>
                             <button
                               type="button"
-                              onClick={(e) => { e.stopPropagation(); removeFile(index) }}
+                              onClick={() => removeFile(index)}
                               className="shrink-0 rounded-sm text-slate-400 transition-colors hover:text-red-500"
                             >
                               <X className="h-3.5 w-3.5" />
