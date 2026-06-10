@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { ArrowRight, Check, Download, CircleCheck, Shield, MapPin, Lock, Search, FileSearch, Users, TrendingUp } from "lucide-react"
+import { ArrowRight, Check, Download, CircleCheck, Shield, MapPin, Lock, Search, FileSearch, Users } from "lucide-react"
 
 const trustBadges = [
   "Kein Demo-Call nötig",
@@ -9,10 +9,10 @@ const trustBadges = [
 ]
 
 const complianceBar = [
-  { icon: Shield, label: "100% DSGVO-konform" },
-  { icon: MapPin, label: "Serverstandort Deutschland (ISO 27001)" },
-  { icon: Lock, label: "Verschlüsselung nach Bankenstandard" },
-  { icon: Search, label: "Auftragsverarbeitungsvertrag (AVV) vorab verfügbar" },
+  { icon: Shield, label: "Datenminimierter Erstcheck" },
+  { icon: MapPin, label: "Keine vollständigen Jahresarchive im Erstschritt" },
+  { icon: Lock, label: "NDA/AVV nach Projektstart möglich" },
+  { icon: Search, label: "Fachliche Prüfung optional" },
 ]
 
 export function HeroSection() {
@@ -168,7 +168,7 @@ export function HeroSection() {
               Unsere hochentwickelte Analyse-Software scannt Ihre Importdaten in wenigen Sekunden auf
               strukturelle Abweichungen und Unstimmigkeiten. Um Fehlalarme auszuschließen, wird jedes
               identifizierte Potenzial anschließend von unseren erfahrenen deutschen Zollexperten manuell
-              verifiziert, bevor Sie Ihre Potenzialeinschätzung erhalten. Maximale Sicherheit, null Risiko.
+              verifiziert, bevor Sie Ihre Potenzialeinschätzung erhalten.
             </p>
           </div>
 
@@ -195,7 +195,7 @@ export function HeroSection() {
         </div>
       </section>
 
-      {/* Case Study Section */}
+      {/* Pilotphase Section */}
       <section className="py-16 md:py-24" style={{ backgroundColor: "#ffffff" }}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
@@ -203,7 +203,7 @@ export function HeroSection() {
               Pilotphase
             </p>
             <h2 className="text-3xl font-bold md:text-4xl" style={{ color: "#0B192C" }}>
-              Ergebnisse aus der Praxis (Pilotphase)
+              Pilotphase für DACH-Importeure
             </h2>
           </div>
 
@@ -214,30 +214,41 @@ export function HeroSection() {
             >
               <div className="mb-5 flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg" style={{ backgroundColor: "#eef3fc" }}>
-                  <TrendingUp className="h-5 w-5" style={{ color: "#1E3A8A" }} />
+                  <FileSearch className="h-5 w-5" style={{ color: "#1E3A8A" }} />
                 </div>
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#1E3A8A" }}>Fallstudie</p>
-                  <p className="text-sm font-medium" style={{ color: "#0B192C" }}>E-Commerce-Importeur</p>
-                </div>
+                <p className="text-sm font-medium" style={{ color: "#0B192C" }}>Kostenloser Erstcheck</p>
               </div>
 
-              <div className="flex flex-col gap-3">
-                <div className="flex items-start gap-3">
-                  <span className="mt-0.5 text-sm font-semibold" style={{ color: "#1E3A8A" }}>Branche:</span>
-                  <span className="text-sm" style={{ color: "#475569" }}>Unterhaltungselektronik</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <span className="mt-0.5 text-sm font-semibold" style={{ color: "#1E3A8A" }}>Importvolumen:</span>
-                  <span className="text-sm" style={{ color: "#475569" }}>12 Mio. € p.a.</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <span className="mt-0.5 text-sm font-semibold" style={{ color: "#1E3A8A" }}>Ergebnis:</span>
-                  <span className="text-sm" style={{ color: "#475569" }}>
-                    14.200 € Zoll-Überzahlungen durch fehlerhafte Tarifnummern-Konsistenz innerhalb von
-                    48 Stunden erfolgreich aufgedeckt und revisionssicher dokumentiert.
-                  </span>
-                </div>
+              <p className="mb-6 text-sm leading-relaxed" style={{ color: "#475569" }}>
+                ZollMetrics prüft derzeit ausgewählte Importdokumente im Rahmen kostenloser
+                Erstchecks. Ziel ist eine datenbasierte Potenzialeinschätzung: Gibt es auffällige
+                Muster, fehlende Nachweise oder mögliche Zoll-Überzahlungen, die eine fachliche
+                Prüfung rechtfertigen?
+              </p>
+
+              <ul className="flex flex-col gap-3">
+                {[
+                  "Kostenloser Erstcheck mit 3–10 Beispieldokumenten",
+                  "Keine Rückerstattungsgarantie",
+                  "Keine Rechts-, Steuer- oder Zollberatung",
+                  "Optional: fachliche Prüfung durch Zollberater, Spediteur oder spezialisierten Partner",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0" style={{ color: "#1E3A8A" }} />
+                    <span className="text-sm" style={{ color: "#475569" }}>{item}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-7">
+                <Link
+                  href="/#scan"
+                  className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
+                  style={{ backgroundColor: "#1E3A8A" }}
+                >
+                  Leak-Scan starten
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
               </div>
             </div>
           </div>

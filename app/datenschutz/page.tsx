@@ -54,19 +54,20 @@ export default function Datenschutz() {
             <section>
               <h2 className="text-xl font-semibold text-[#0B1F3A]">5. Speicherung und Sicherheit Ihrer Daten</h2>
               <p className="mt-2">
-                <strong>Speicherort:</strong> Alle Daten werden auf sicheren Servern in der Europäischen Union (EU) gespeichert.
-              </p>
-              <p className="mt-3">
-                <strong>Sicherheitsmaßnahmen:</strong>
+                Wir setzen angemessene technische und organisatorische Maßnahmen ein, um Ihre Daten zu schützen.
               </p>
               <ul className="mt-2 list-inside space-y-1 text-sm">
-                <li>• 256-bit SSL/TLS-Verschlüsselung für alle Datenübertragungen</li>
-                <li>• Verschlüsselte Speicherung sensibler Daten</li>
-                <li>• Regelmäßige Sicherheitsprüfungen und Penetrationstests</li>
-                <li>• Zugriffskontrolle und Mitarbeiterschulung</li>
+                <li>• Verschlüsselte Datenübertragung (SSL/TLS)</li>
+                <li>• Datenminimierung: Im Erstcheck nur ausgewählte Beispieldokumente</li>
+                <li>• Zugriffsbeschränkung auf befugte Personen</li>
               </ul>
+              <p className="mt-3 text-sm">
+                Für die technische Bereitstellung der Website und die Entgegennahme von Dokumenten setzen
+                wir externe Dienstleister ein (siehe Abschnitte zu Uploadcare, Vercel und Supabase).
+                Dabei kann eine Verarbeitung auch außerhalb Deutschlands bzw. der EU erfolgen.
+              </p>
               <p className="mt-3">
-                <strong>Speicherdauer:</strong> Geschäftsdaten (Zolldokumente) werden nach Projektabschluss automatisch gelöscht. Kontaktdaten werden für maximal 12 Monate gespeichert oder bis Sie diese Speicherung widerrufen.
+                <strong>Speicherdauer:</strong> Geschäftsdaten (Zolldokumente) werden nach Abschluss des Erstchecks bzw. des Projekts gelöscht. Kontaktdaten werden für maximal 12 Monate gespeichert oder bis Sie diese Speicherung widerrufen.
               </p>
             </section>
 
@@ -83,14 +84,47 @@ export default function Datenschutz() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-[#0B1F3A]">7. Google Analytics</h2>
+              <h2 className="text-xl font-semibold text-[#0B1F3A]">7. Dateiübermittlung über Uploadcare</h2>
               <p className="mt-2">
-                Diese Website nutzt Google Analytics zur Analyse von Besucherverhalten. Die erfassten Daten werden anonymisiert und nicht mit anderen Datenquellen zusammengeführt. Sie können dem Datentracking widersprechen.
+                Für die technische Entgegennahme von Testdokumenten nutzen wir Uploadcare. Dabei können
+                hochgeladene Dateien, Dateinamen, technische Metadaten, Upload-Zeitpunkte und Abruflinks
+                verarbeitet werden. Die Verarbeitung erfolgt ausschließlich zur Bearbeitung der angefragten
+                datenbasierten Voranalyse. Bitte laden Sie nur Dokumente hoch, zu deren Übermittlung Sie
+                berechtigt sind, und im Erstcheck nur ausgewählte Beispieldokumente.
+              </p>
+              <p className="mt-3 text-sm">
+                Für vollständige Projektanalysen oder größere Datenmengen kann ein gesonderter Datenraum
+                mit individuell abgestimmten Datenschutz- und Vertraulichkeitsvereinbarungen eingerichtet werden.
               </p>
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-[#0B1F3A]">8. Ihre Rechte</h2>
+              <h2 className="text-xl font-semibold text-[#0B1F3A]">8. Reichweitenmessung mit Vercel Analytics</h2>
+              <p className="mt-2">
+                Zur technischen Analyse der Website-Nutzung kann Vercel Analytics eingesetzt werden. Dabei
+                werden Nutzungsdaten in aggregierter Form ausgewertet. Wir nutzen diese Daten, um die Website
+                technisch und inhaltlich zu verbessern.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-xl font-semibold text-[#0B1F3A]">9. Datenraum / Datenbank über Supabase</h2>
+              <p className="mt-2">
+                Für bestimmte Projekt- oder Datenraumfunktionen kann Supabase eingesetzt werden. Dabei können
+                Formularangaben, Metadaten und projektbezogene Informationen verarbeitet werden.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-xl font-semibold text-[#0B1F3A]">10. Keine Zollberatung</h2>
+              <p className="mt-2">
+                Die Verarbeitung der Dokumente dient ausschließlich einer datenbasierten Voranalyse.
+                ZollMetrics erbringt keine Rechts-, Steuer- oder Zollberatung.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-xl font-semibold text-[#0B1F3A]">11. Ihre Rechte</h2>
               <p className="mt-2">Sie haben folgende Rechte bezüglich Ihrer personenbezogenen Daten:</p>
               <ul className="mt-3 list-inside space-y-2 text-sm">
                 <li>• <strong>Auskunftsrecht:</strong> Sie können erfahren, welche Daten wir über Sie speichern</li>
@@ -105,14 +139,14 @@ export default function Datenschutz() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-[#0B1F3A]">9. Kontakt zum Datenschutzbeauftragten</h2>
+              <h2 className="text-xl font-semibold text-[#0B1F3A]">12. Kontakt zum Datenschutzbeauftragten</h2>
               <p className="mt-2">
                 Bei Fragen zum Datenschutz erreichen Sie uns unter: <a href="mailto:team@zollmetrics.com" className="text-[#0B1F3A] underline">team@zollmetrics.com</a>
               </p>
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-[#0B1F3A]">10. Beschwerderecht</h2>
+              <h2 className="text-xl font-semibold text-[#0B1F3A]">13. Beschwerderecht</h2>
               <p className="mt-2">
                 Sie haben das Recht, eine Beschwerde bei einer Datenschutzaufsichtsbehörde einzureichen, wenn Sie der Ansicht sind, dass wir Ihre Rechte verletzten. Die zuständige Behörde für Bayern ist:
               </p>
@@ -126,7 +160,7 @@ export default function Datenschutz() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-[#0B1F3A]">11. Änderungen dieser Datenschutzerklärung</h2>
+              <h2 className="text-xl font-semibold text-[#0B1F3A]">14. Änderungen dieser Datenschutzerklärung</h2>
               <p className="mt-2">
                 Wir können diese Datenschutzerklärung jederzeit anpassen. Die aktuelle Version wird auf unserer Website veröffentlicht.
               </p>

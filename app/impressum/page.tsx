@@ -14,13 +14,15 @@ export default function Impressum() {
               <h2 className="text-xl font-semibold text-[#0B1F3A]">Angaben gemäß § 5 TMG</h2>
               <p className="mt-2">
                 ZollMetrics<br />
+                Projekt in Vorbereitung der Gesellschaftsgründung<br />
                 Adlerstraße 14<br />
-                90403 Nürnberg
+                90403 Nürnberg<br />
+                Deutschland
               </p>
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-[#0B1F3A]">Geschäftsführung</h2>
+              <h2 className="text-xl font-semibold text-[#0B1F3A]">Anbieter / Projektverantwortliche</h2>
               <p className="mt-2">
                 Normann Frei<br />
                 Benjamin Eisenhammer<br />
@@ -44,7 +46,7 @@ export default function Impressum() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-[#0B1F3A]">Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h2>
+              <h2 className="text-xl font-semibold text-[#0B1F3A]">Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</h2>
               <p className="mt-2">
                 Normann Frei<br />
                 Adlerstraße 14<br />

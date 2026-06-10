@@ -58,7 +58,6 @@ export function Footer() {
             <Link href="/sicherheit" className="text-sm text-slate-400 transition-colors hover:text-white">Sicherheit & FAQ</Link>
             <span className="text-slate-600">|</span>
             <Link href="/impressum" className="text-sm text-slate-400 transition-colors hover:text-white">Impressum</Link>
-            <Link href="/agb" className="text-sm text-slate-400 transition-colors hover:text-white">AGB</Link>
             <Link href="/datenschutz" className="text-sm text-slate-400 transition-colors hover:text-white">Datenschutz</Link>
           </div>
         </div>

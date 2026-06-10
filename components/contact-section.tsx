@@ -143,6 +143,7 @@ export function ContactSection() {
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>("idle")
   const [errorMessage, setErrorMessage] = useState("")
   const [validationErrors, setValidationErrors] = useState<Record<string, boolean>>({})
+  const [consent, setConsent] = useState({ berechtigt: false, keineBeratung: false, datenschutz: false })
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const set = (key: keyof FormData) => (v: string) => {
@@ -202,7 +203,8 @@ export function ContactSection() {
     setSelectedFiles((prev) => prev.filter((f) => f.name !== name))
   }
 
-  const canSubmit = selectedFiles.length > 0 && !!formData.unternehmen && uploadStatus !== "uploading"
+  const allConsentGiven = consent.berechtigt && consent.keineBeratung && consent.datenschutz
+  const canSubmit = selectedFiles.length > 0 && !!formData.unternehmen && allConsentGiven && uploadStatus !== "uploading"
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -211,10 +213,19 @@ export function ContactSection() {
       setUploadStatus("error")
       return
     }
+    if (!allConsentGiven) {
+      setErrorMessage("Bitte bestätigen Sie alle Pflichtangaben, bevor Sie absenden.")
+      setUploadStatus("error")
+      return
+    }
     setUploadStatus("uploading")
     setErrorMessage("")
 
     try {
+      // TODO (Sicherheit): Uploadcare erzeugt standardmäßig öffentlich abrufbare CDN-URLs (store: "auto").
+      // Für sensible Zolldokumente sollte mittelfristig auf zugriffsbeschränkte/signierte URLs oder
+      // einen geschützten Datenraum umgestellt werden. Außerdem sollte NEXT_PUBLIC_UPLOADCARE_PUBLIC_KEY
+      // in Produktion gesetzt sein – der "demopublickey"-Fallback ist nur für die Entwicklung gedacht.
       const publicKey = process.env.NEXT_PUBLIC_UPLOADCARE_PUBLIC_KEY ?? "demopublickey"
 
       const uploaded = await Promise.all(
@@ -272,6 +283,7 @@ export function ContactSection() {
                 setFormData(EMPTY)
                 setSelectedFiles([])
                 setValidationErrors({})
+                setConsent({ berechtigt: false, keineBeratung: false, datenschutz: false })
               }}
               className="rounded-lg border border-slate-200 bg-slate-50 px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100"
             >
@@ -493,6 +505,43 @@ export function ContactSection() {
                       className="rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-[#1E3A8A] focus:outline-none focus:ring-1 focus:ring-[#1E3A8A]"
                     />
                   </div>
+
+                  {/* Pflicht-Zustimmungen */}
+                  <fieldset className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <legend className="px-1 text-sm font-medium text-slate-700">Bitte bestätigen Sie vor dem Absenden</legend>
+                    {[
+                      { key: "berechtigt" as const, label: "Ich bestätige, dass ich berechtigt bin, diese Dokumente hochzuladen." },
+                      { key: "keineBeratung" as const, label: "Ich habe verstanden, dass ZollMetrics eine datenbasierte Voranalyse und keine Rechts-, Steuer- oder Zollberatung anbietet." },
+                      {
+                        key: "datenschutz" as const,
+                        label: (
+                          <>
+                            Ich stimme der Verarbeitung meiner Angaben und Testdokumente zur Bearbeitung der Anfrage gemäß{" "}
+                            <a href="/datenschutz" target="_blank" rel="noopener noreferrer" className="text-[#1E3A8A] underline hover:opacity-80">
+                              Datenschutzerklärung
+                            </a>{" "}
+                            zu.
+                          </>
+                        ),
+                      },
+                    ].map((item) => (
+                      <label key={item.key} className="flex cursor-pointer items-start gap-3 text-sm text-slate-600">
+                        <input
+                          type="checkbox"
+                          checked={consent[item.key]}
+                          onChange={(e) => {
+                            setConsent((p) => ({ ...p, [item.key]: e.target.checked }))
+                            if (e.target.checked && uploadStatus === "error") {
+                              setUploadStatus("idle")
+                              setErrorMessage("")
+                            }
+                          }}
+                          className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-[#1E3A8A] accent-[#1E3A8A] focus:ring-1 focus:ring-[#1E3A8A]"
+                        />
+                        <span className="leading-relaxed">{item.label}</span>
+                      </label>
+                    ))}
+                  </fieldset>
 
                   {uploadStatus === "error" && (
                     <div className="flex items-center gap-2 rounded-lg border px-4 py-3 text-sm" style={{ borderColor: "#fecaca", backgroundColor: "#fef2f2", color: "#991b1b" }}>
